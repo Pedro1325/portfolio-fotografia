@@ -29,7 +29,13 @@ export default function Reveal({ as: Tag = "div", className = "", children, ...p
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Component = Tag as any;
   return (
-    <Component ref={ref} className={className + (visible ? " is-visible" : "")} {...props}>
+    <Component
+      ref={ref}
+      className={`transition-all duration-700 ease-out transform ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      } ${className}`}
+      {...props}
+    >
       {children}
     </Component>
   );

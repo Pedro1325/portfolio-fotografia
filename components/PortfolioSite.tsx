@@ -10,16 +10,18 @@ import AlbumSection from "./AlbumSection";
 import AboutSection from "./AboutSection";
 import ContactSection from "./ContactSection";
 import Footer from "./Footer";
+import { DEFAULT_THEME } from "@/lib/themes";
 
-/*
-  PortfolioSite renders with the build-time data first (so the initial
-  HTML always matches server output — no hydration mismatch), then, once
-  mounted, swaps in a local curation draft if /admin saved one in this
-  browser's localStorage. That's the same "preview before you export"
-  behavior the static version had.
-*/
 export default function PortfolioSite({ initialData }: { initialData: PortfolioData }) {
   const [data, setData] = useState(initialData);
+  const currentTheme= data.theme  || DEFAULT_THEME;
+  const themeStyles = {
+     "--brand-bg": currentTheme.bgPrimary,
+        "--brand-bg-tint": currentTheme.bgTint,
+        "--brand-accent": currentTheme.accentColor,
+        "--brand-accent-ink": currentTheme.accentInk,
+        "--brand-ink": currentTheme.textColor,
+  } as React.CSSProperties;
 
   useEffect(() => {
     const draft = loadDraft();
@@ -27,16 +29,19 @@ export default function PortfolioSite({ initialData }: { initialData: PortfolioD
   }, []);
 
   return (
-    <>
+    <div style={themeStyles} className="min-h-screen bg-brand-bg text-brand-ink transition-colors duration-300">
       <HeartClipDefs />
-      <a className="skip-link" href="#conteudo">
+      <a
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-accent-deep focus:text-brand-accent-ink focus:rounded-full focus:shadow-lg focus:font-semibold focus:text-sm"
+        href="#conteudo"
+      >
         Pular para o conteúdo
       </a>
 
       <TopBar />
 
       <noscript>
-        <p className="noscript-note">
+        <p className="bg-brand-accent-soft text-brand-ink text-center py-2.5 px-4 text-sm font-medium">
           Ative o JavaScript para ver o portfólio completo — as fotos e os dados de contato são carregados
           dinamicamente.
         </p>
@@ -52,6 +57,6 @@ export default function PortfolioSite({ initialData }: { initialData: PortfolioD
       </main>
 
       <Footer data={data} />
-    </>
+    </div>
   );
 }

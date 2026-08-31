@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "../css/tokens.css";
-import "../css/site.css";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Nome da Fotógrafa — Fotografia",

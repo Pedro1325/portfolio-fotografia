@@ -63,16 +63,26 @@ export default function AddPhotoForm({ categories, onAdd, onStatus }: AddPhotoFo
   }
 
   return (
-    <section className="admin-add">
-      <h2>Adicionar foto</h2>
-      <p className="admin-add__help">
-        Primeiro copie o arquivo da foto pra dentro de <code>public/fotos/&lt;categoria&gt;/</code>. Depois cadastre
-        ela aqui com o mesmo nome de arquivo.
-      </p>
-      <form ref={formRef} className="admin-add__form" onSubmit={handleSubmit}>
-        <div className="admin-field">
-          <label htmlFor="f-category">Categoria</label>
-          <select id="f-category" name="category" defaultValue={categories[0]?.id}>
+    <section className="bg-brand-paper p-6 sm:p-8 rounded-card border border-brand-line-soft/80 shadow-card flex flex-col gap-6">
+      <div>
+        <h2 className="font-display text-3xl text-brand-ink">Adicionar foto</h2>
+        <p className="text-xs text-brand-ink-soft bg-brand-bg-inset p-3 rounded border border-brand-line-soft/60 mt-2">
+          Primeiro copie o arquivo da foto pra dentro de <code>public/fotos/&lt;categoria&gt;/</code>. Depois cadastre
+          ela aqui com o mesmo nome de arquivo.
+        </p>
+      </div>
+
+      <form ref={formRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end" onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint" htmlFor="f-category">
+            Categoria
+          </label>
+          <select
+            id="f-category"
+            name="category"
+            defaultValue={categories[0]?.id}
+            className="w-full px-3 py-2 text-sm bg-brand-bg-raised border border-brand-line rounded focus:outline-none focus:ring-2 focus:ring-brand-accent-deep text-brand-ink"
+          >
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.label}
@@ -80,39 +90,75 @@ export default function AddPhotoForm({ categories, onAdd, onStatus }: AddPhotoFo
             ))}
           </select>
         </div>
-        <div className="admin-field">
-          <label htmlFor="f-filename">Nome do arquivo</label>
-          <input id="f-filename" name="filename" type="text" placeholder="ana-e-joao-01.jpg" autoComplete="off" />
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint" htmlFor="f-filename">
+            Nome do arquivo
+          </label>
+          <input
+            id="f-filename"
+            name="filename"
+            type="text"
+            placeholder="ana-e-joao-01.jpg"
+            autoComplete="off"
+            className="w-full px-3 py-2 text-sm bg-brand-bg-raised border border-brand-line rounded focus:outline-none focus:ring-2 focus:ring-brand-accent-deep text-brand-ink placeholder:text-brand-ink-faint/50"
+          />
         </div>
-        <div className="admin-field">
-          <label htmlFor="f-caption">Legenda</label>
-          <input id="f-caption" name="caption" type="text" placeholder="Ana & João — cerimônia" autoComplete="off" />
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint" htmlFor="f-caption">
+            Legenda
+          </label>
+          <input
+            id="f-caption"
+            name="caption"
+            type="text"
+            placeholder="Ana & João — cerimônia"
+            autoComplete="off"
+            className="w-full px-3 py-2 text-sm bg-brand-bg-raised border border-brand-line rounded focus:outline-none focus:ring-2 focus:ring-brand-accent-deep text-brand-ink placeholder:text-brand-ink-faint/50"
+          />
         </div>
-        <div className="admin-field admin-field--check">
-          <label className="admin-check">
-            <input type="checkbox" name="featured" />
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint" htmlFor="f-file">
+            Foto (opcional, só pra prévia)
+          </label>
+          <input
+            id="f-file"
+            name="file"
+            type="file"
+            accept="image/*"
+            onChange={handleFilePicked}
+            className="w-full text-xs text-brand-ink file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-brand-bg-inset file:text-brand-accent-deep hover:file:bg-brand-bg-alt/50 cursor-pointer"
+          />
+        </div>
+
+        <div className="flex items-center pb-2">
+          <label className="flex items-center gap-2 text-xs font-semibold text-brand-ink cursor-pointer">
+            <input type="checkbox" name="featured" className="w-4 h-4 rounded text-brand-accent-deep focus:ring-brand-accent accent-brand-accent-deep" />
             <span>Destaque na home</span>
           </label>
         </div>
-        <div className="admin-field">
-          <label htmlFor="f-file">Foto (opcional, só pra prévia)</label>
-          <input id="f-file" name="file" type="file" accept="image/*" onChange={handleFilePicked} />
+
+        <div>
+          <button
+            type="submit"
+            className="w-full px-5 py-2.5 bg-brand-accent-deep hover:bg-brand-accent-strong text-brand-accent-ink font-semibold text-xs uppercase tracking-wider rounded shadow-sm hover:shadow transition"
+          >
+            Adicionar à lista
+          </button>
         </div>
-        <div className="admin-field admin-field--wide" id="add-photo-preview" aria-live="polite">
-          {preview && (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={preview.url} alt="Pré-visualização" />
-              <p>
-                Pré-visualização só neste navegador. Copie o arquivo pra{" "}
-                <code>public/fotos/&lt;categoria&gt;/{preview.name}</code> antes de publicar.
-              </p>
-            </>
-          )}
-        </div>
-        <button type="submit" className="admin-btn admin-btn--primary">
-          Adicionar à lista
-        </button>
+
+        {preview && (
+          <div className="col-span-full bg-brand-bg-inset p-3.5 rounded border border-brand-line-soft flex items-center gap-4 text-xs text-brand-ink-soft mt-2" aria-live="polite">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview.url} alt="Pré-visualização" className="w-16 h-16 object-cover rounded shadow-sm" />
+            <p>
+              Pré-visualização só neste navegador. Copie o arquivo pra{" "}
+              <code>public/fotos/&lt;categoria&gt;/{preview.name}</code> antes de publicar.
+            </p>
+          </div>
+        )}
       </form>
     </section>
   );

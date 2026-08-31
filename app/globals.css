@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-brand-bg text-brand-ink font-sans text-base antialiased leading-relaxed;
+    margin: 0;
+  }
+}
+
+.clip-heart {
+  clip-path: url(#heart-clip);
+}
+
+.bg-checkered {
+  background: repeating-linear-gradient(135deg, #fbe9ee 0 2px, #fffaf3 2px 14px);
+}

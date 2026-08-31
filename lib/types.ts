@@ -1,3 +1,5 @@
+import { ThemeConfig } from "./themes";
+
 export interface Photo {
   id: string;
   category: string;
@@ -31,4 +33,5 @@ export interface PortfolioData {
   photographer: Photographer;
   categories: Category[];
   photos: Photo[];
+  theme?: ThemeConfig;
 }

@@ -66,10 +66,10 @@ qualquer erro de TypeScript que eu tenha deixado passar vai aparecer.
 
 ```
 app/
-  layout.tsx           → layout raiz: importa tokens.css + site.css, <html>/<body>
+  layout.tsx           → layout raiz: importa globals.css (Tailwind), <html>/<body>
   page.tsx              → rota "/" — monta PortfolioSite com os dados
   admin/
-    layout.tsx           → metadata (noindex) + importa admin.css
+    layout.tsx           → metadata (noindex)
     page.tsx               → rota "/admin" — monta AdminApp
 
 components/
@@ -86,11 +86,6 @@ lib/
   portfolioHelpers.ts       → seleção de fotos por categoria + leitura/escrita do rascunho local
   adminHelpers.ts             → clone, slugify, exportação de dados
   useReveal.ts                 → hook do fade-in ao rolar
-
-css/
-  tokens.css             → cores, tipografia, espaçamento (design tokens)
-  site.css                → estilos do site público
-  admin.css                → estilos da área da fotógrafa
 
 public/fotos/           → onde as fotos reais devem entrar (ver public/fotos/LEIA-ME.md)
 ```

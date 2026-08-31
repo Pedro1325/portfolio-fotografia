@@ -10,6 +10,8 @@ import AddPhotoForm from "./AddPhotoForm";
 import CategoryTable from "./CategoryTable";
 import AdminActions from "./AdminActions";
 import type { PortfolioData, Photo } from "@/lib/types";
+import ThemeCustomizer from "./ThemeCustomizer";
+import { DEFAULT_THEME, type ThemeConfig } from "@/lib/themes";
 
 function timeNow(): string {
   const d = new Date();
@@ -20,9 +22,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
   const [state, setState] = useState<PortfolioData>(initialData);
   const [status, setStatus] = useState("Alterações são salvas automaticamente neste navegador.");
   const [statusError, setStatusError] = useState(false);
-
-  // Resume a previously saved draft, if this browser has one — mirrors the
-  // public site's behavior so what you left off editing is still here.
+  
   useEffect(() => {
     const draft = loadDraft();
     if (draft) setState(draft);
@@ -38,6 +38,18 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
       setStatus("Não foi possível salvar automaticamente (armazenamento local indisponível).");
       setStatusError(true);
     }
+  }
+
+  function handleThemeChange(patch: Partial<ThemeConfig>) {
+    const next = clone(state);
+    next.theme = { ...(next.theme || DEFAULT_THEME), ...patch };
+    persist(next, "Cores personalizadas — salvo às " + timeNow() + ".");
+  }
+
+  function handleSelectPreset(preset: ThemeConfig) {
+    const next = clone(state);
+    next.theme = clone(preset);
+    persist(next, `Paleta "${preset.name}" aplicada — salvo às ` + timeNow() + ".");
   }
 
   function handleChange(id: string, patch: Partial<Photo>) {
@@ -88,31 +100,49 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
   }
 
   return (
-    <>
-      <header className="admin-topbar">
-        <div className="admin-topbar__inner">
-          <Link className="admin-topbar__back" href="/">
-            <BackArrowIcon />
+    <div className="min-h-screen bg-brand-bg text-brand-ink">
+      <header className="sticky top-0 z-40 bg-brand-bg-raised/95 backdrop-blur-md border-b border-brand-line shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+          <Link
+            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-ink hover:text-brand-accent transition-colors"
+            href="/"
+          >
+            <BackArrowIcon className="w-4 h-4" />
             Ver site
           </Link>
-          <h1>Área da fotógrafa</h1>
-          <p className={"admin-topbar__status" + (statusError ? " is-error" : "")} role="status" aria-live="polite">
+          <h1 className="font-display text-2xl md:text-3xl text-brand-ink">Área da fotógrafa</h1>
+          <p
+            className={`text-xs font-medium px-3 py-1 rounded-full ${
+              statusError
+                ? "bg-rose-100 text-rose-700 border border-rose-200"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            }`}
+            role="status"
+            aria-live="polite"
+          >
             {status}
           </p>
         </div>
       </header>
 
-      <div className="admin-notice">
-        <AlertIcon />
-        <p>
-          Esta página não fica no menu do site, mas o endereço não é secreto — qualquer pessoa com o link consegue
-          abrir. Pra proteger de verdade, ative a senha de acesso do seu provedor de hospedagem (veja o README do
-          projeto).
-        </p>
+      <div className="max-w-6xl mx-auto px-6 pt-6">
+        <div className="p-4 bg-amber-50/80 border border-amber-200/80 rounded-card flex items-start gap-3 text-xs text-amber-900 shadow-sm">
+          <AlertIcon className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <p>
+            Esta página não fica no menu do site, mas o endereço não é secreto — qualquer pessoa com o link consegue
+            abrir. Pra proteger de verdade, ative a senha de acesso do seu provedor de hospedagem (veja o README do
+            projeto).
+          </p>
+        </div>
       </div>
 
-      <main className="admin-main">
+      <main className="max-w-6xl mx-auto px-6 py-8 pb-32 flex flex-col gap-10">
         <AdminSummary state={state} />
+        <ThemeCustomizer
+          theme={state.theme || DEFAULT_THEME }
+          onChange={handleThemeChange}
+          onSelectPreset={handleSelectPreset}
+          />
         <AddPhotoForm
           categories={state.categories}
           onAdd={handleAdd}
@@ -133,6 +163,6 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
       </main>
 
       <AdminActions onReset={handleReset} onExport={handleExport} />
-    </>
+    </div>
   );
 }

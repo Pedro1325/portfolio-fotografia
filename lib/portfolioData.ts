@@ -1,34 +1,21 @@
-/*
-  lib/portfolioData.ts — single source of truth for the portfolio content.
-
-  Meant to be hand-edited (or regenerated via /admin's "Exportar dados
-  atualizados" button, which downloads a new version of this file).
-
-  HOW TO ADD A REAL PHOTO
-  ------------------------
-  1. Drop the image file into public/fotos/<categoria>/ (see
-     public/fotos/LEIA-ME.md).
-  2. Set that photo's "src" below to the site-root path, e.g.
-     "/fotos/casamentos/ana-e-joao-01.jpg".
-  3. Leave "src" as null to keep showing the labeled placeholder tile.
-  Or do all of this visually through /admin instead of editing by hand.
-*/
 
 import type { PortfolioData } from "./types";
+import { DEFAULT_THEME } from "./themes";
 
 export const PORTFOLIO_DATA: PortfolioData = {
+  theme: DEFAULT_THEME,
   photographer: {
-    name: "Nome da Fotógrafa",
+    name: "Sabrina Carneiro",
     role: "Fotógrafa",
-    location: "Cidade, UF",
+    location: "São Paulo",
     bio:
       "Texto de apresentação dela: quem é, o que persegue nas fotos, " +
       "o que um cliente pode esperar de trabalhar com ela. " +
       "[SUBSTITUA — este parágrafo é um placeholder de tom, não um fato.]",
     email: "contato@substituir.com",
-    phone: "(00) 00000-0000",
-    instagram: "@substituir",
-    whatsapp: "5500000000000",
+    phone: "+55 (11) 99439-8447",
+    instagram: "@imfroge",
+    whatsapp: "55 11 99439-8447",
   },
 
   categories: [
@@ -87,4 +74,7 @@ export const PORTFOLIO_DATA: PortfolioData = {
     { id: "edi-04", category: "editorial", src: null, caption: "Editorial independente 02", featured: false, selected: true, order: 4 },
     { id: "edi-05", category: "editorial", src: null, caption: "Bastidor de set", featured: false, selected: true, order: 5 },
   ],
+  
+  
 };
+
