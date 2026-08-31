@@ -1,0 +1,85 @@
+/*
+  Design tokens — "Diário de Set" world (scrapbook romântico).
+  Referência: mesa de scrapbook à luz da tarde — papel creme, fita
+  rosa, washi tape, recortes em coração, laço de cetim.
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+:root {
+  /* --- Color: ground --- */
+  --bg: #fdf4ee;
+  --bg-alt: #f7c9d9;
+  --bg-raised: #fffaf6;
+  --bg-inset: #fbe9ee;
+  --line: #f0c9d6;
+  --line-soft: #f6dde6;
+
+  /* --- Color: ink --- */
+  --ink: #5a3341;
+  --ink-soft: #8a5a6a;
+  --ink-faint: #8f6070;
+
+  /* --- Color: accent (rose — dominant) ---
+     accent / accent-strong: decorative + large display text only (script
+     headings, icon strokes, borders) — under 4.5:1 at small sizes.
+     accent-deep: the only rose safe as a solid button fill under light text. */
+  --accent: #e0709e;
+  --accent-strong: #c94f7f;
+  --accent-deep: #b83d6b;
+  --accent-soft: #f7c9d9;
+  --accent-ink: #fff9f6;
+
+  /* --- Color: gold (pearls, ribbon sheen — sparing) --- */
+  --gold: #cf9f5f;
+  --gold-soft: #e8d3ad;
+
+  /* --- Color: heart stamp (favorite mark) --- */
+  --stamp: #c94f7f;
+  --stamp-ink: #fff9f6;
+
+  /* --- Color: paper (photo mats, torn-note cards) --- */
+  --paper: #fffaf3;
+  --paper-ink: #5a3341;
+
+  /* --- Type families --- */
+  --font-display: "Alex Brush", "Segoe Script", cursive;
+  --font-hand: "Caveat", "Segoe Script", cursive;
+  --font-label: "Poppins", "Segoe UI", sans-serif;
+  --font-mono: "Poppins", "Segoe UI", sans-serif;
+
+  /* --- Type scale (fluid, floor -0.04em tracking on display) --- */
+  --size-display: clamp(3.25rem, 5vw + 1.5rem, 6rem);
+  --size-h2: clamp(2.25rem, 3vw + 1rem, 3.75rem);
+  --size-h3: clamp(1.35rem, 1.2vw + 1rem, 1.9rem);
+  --size-body: clamp(1rem, 0.3vw + 0.9rem, 1.125rem);
+  --size-label: 0.8125rem;
+  --size-mono: 0.875rem;
+
+  /* --- Spacing rhythm --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* --- Motion --- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 180ms;
+  --dur-med: 360ms;
+  --dur-slow: 620ms;
+
+  /* --- Elevation (soft offset blur, never hard block shadow) --- */
+  --shadow-card: 0 14px 28px -12px rgba(201, 79, 127, 0.28), 0 3px 8px rgba(90, 51, 65, 0.1);
+  --shadow-badge: 0 16px 32px -12px rgba(201, 79, 127, 0.35), 0 4px 10px rgba(207, 159, 95, 0.18);
+
+  --radius-card: 6px;
+  --radius-badge: 999px;
+
+  --measure: 66ch;
+}
