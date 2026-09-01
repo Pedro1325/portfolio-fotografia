@@ -27,6 +27,7 @@ export interface Photographer {
   phone: string;
   instagram: string;
   whatsapp: string;
+  avatar?: string;
 }
 
 export interface PortfolioData {
