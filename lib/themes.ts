@@ -3,12 +3,12 @@ export interface ThemeConfig {
     id: string; 
     name: string; 
     description: string;
-    bgPrimary: string; // Cor do fundo como principal
-    bgTint: string; //Cor de fundo de sessao alternadas 
+    bgPrimary: string; 
+    bgTint: string;  
     accentInk: string,
-    accentColor: string; // Cor de botões, tag de destaque
-    textColor: string // Cor de texto
-    fontFamily: "hand" | "serif" | "sans"; // Vibe tipográfica
+    accentColor: string; 
+    textColor: string 
+    fontFamily: "hand" | "serif" | "sans"; 
 }
 
 export const THEME_PRESETS: ThemeConfig[] =  [

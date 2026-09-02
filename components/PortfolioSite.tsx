@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { loadDraft } from "@/lib/portfolioHelpers";
 import type { PortfolioData } from "@/lib/types";
 import HeartClipDefs from "./HeartClipDefs";
 import TopBar from "./TopBar";
@@ -13,8 +11,8 @@ import Footer from "./Footer";
 import { DEFAULT_THEME } from "@/lib/themes";
 
 export default function PortfolioSite({ initialData }: { initialData: PortfolioData }) {
-  const [data, setData] = useState(initialData);
-  const currentTheme= data.theme  || DEFAULT_THEME;
+  const data = initialData;
+  const currentTheme = data.theme || DEFAULT_THEME;
   const themeStyles = {
      "--brand-bg": currentTheme.bgPrimary,
         "--brand-bg-tint": currentTheme.bgTint,
@@ -22,11 +20,6 @@ export default function PortfolioSite({ initialData }: { initialData: PortfolioD
         "--brand-accent-ink": currentTheme.accentInk,
         "--brand-ink": currentTheme.textColor,
   } as React.CSSProperties;
-
-  useEffect(() => {
-    const draft = loadDraft();
-    if (draft) setData(draft);
-  }, []);
 
   return (
     <div style={themeStyles} className="min-h-screen bg-brand-bg text-brand-ink transition-colors duration-300">

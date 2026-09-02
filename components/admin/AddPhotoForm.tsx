@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { slugify } from "@/lib/adminHelpers";
 import type { Category, Photo } from "@/lib/types";
 
 interface AddPhotoFormElements extends HTMLFormControlsCollection {
@@ -14,7 +13,7 @@ interface AddPhotoFormElements extends HTMLFormControlsCollection {
 
 interface AddPhotoFormProps {
   categories: Category[];
-  onAdd: (photo: Omit<Photo, "order">) => void;
+  onAdd: (photo: Omit<Photo, "id" | "order">) => void;
   onStatus: (message: string, isError?: boolean) => void;
 }
 
@@ -48,9 +47,7 @@ export default function AddPhotoForm({ categories, onAdd, onStatus }: AddPhotoFo
       return;
     }
 
-    const id = category + "-" + slugify(caption || filename) + "-" + Date.now().toString(36).slice(-4);
     onAdd({
-      id,
       category,
       src: "/fotos/" + category + "/" + filename.replace(/^\/+/, ""),
       caption: caption || filename,

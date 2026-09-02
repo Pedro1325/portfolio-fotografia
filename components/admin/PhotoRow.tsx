@@ -32,7 +32,6 @@ export default function PhotoRow({ photo, categoryId, onChange, onRemove }: Phot
         ) : broken ? (
           <span className="text-[10px] text-rose-600 max-w-[100px] block leading-tight">arquivo não encontrado</span>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={photo.src} alt="" loading="lazy" className="w-12 h-14 object-cover rounded border border-brand-line-soft shadow-sm" onError={() => setBroken(true)} />
         )}
       </td>

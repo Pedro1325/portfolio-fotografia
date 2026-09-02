@@ -71,8 +71,7 @@ export const config = { matcher: "/admin/:path*" };
 
 ```js
 // app/admin/login/page.js — formulário simples de senha
-// app/api/admin-login/route.js — confere a senha contra process.env.ADMIN_PASSWORD
-//   e, se bater, seta o cookie "admin_session" (httpOnly, secure) com o
+// app/api/admin-login/route.js — confere a senha contra process.enve, se bater, seta o cookie "admin_session" (httpOnly, secure) com o
 //   valor de process.env.ADMIN_SESSION_SECRET.
 ```
 

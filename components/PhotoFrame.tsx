@@ -52,7 +52,6 @@ export default function PhotoFrame({ photo, index, heart = false, hero = false, 
         }`}
       >
         {photo.src ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photo.src}
             alt={photo.caption || ""}

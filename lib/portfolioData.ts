@@ -4,7 +4,7 @@ import { DEFAULT_THEME } from "./themes";
 export const PORTFOLIO_DATA: PortfolioData = {
   theme: DEFAULT_THEME,
   photographer: {
-    name: "Sabrina Carneiro",
+    name: "Sabrina Trindade",
     role: "Fotógrafa",
     location: "São Paulo",
     bio:
@@ -58,6 +58,8 @@ export const PORTFOLIO_DATA: PortfolioData = {
     { id: "cas-08", category: "casamentos", src: "/fotos/casamentos/10.jpg", caption: "Maternidade — detalhes e ternura", featured: false, selected: true, order: 8 },
     { id: "cas-09", category: "casamentos", src: "/fotos/casamentos/11.jpg", caption: "Gestante — iluminação suave", featured: false, selected: true, order: 9 },
     { id: "cas-10", category: "casamentos", src: "/fotos/casamentos/12.jpg", caption: "Retrato autoral expressivo", featured: false, selected: true, order: 10 },
+    { id: "cas-11", category: "casamentos", src: "/fotos/casamentos/5.jpg", caption: "Pai e filho — momentos de brincadeira", featured: false, selected: true, order: 11 },
+    { id: "cas-12", category: "casamentos", src: "/fotos/casamentos/8.jpg", caption: "Casal apaixonado — cumplicidade e romance", featured: false, selected: true, order: 12 },
 
     { id: "ret-01", category: "retratos", src: "/fotos/retratos/9.jpg", caption: "Ensaio gestante — espera doce", featured: true, selected: true, order: 1 },
     { id: "ret-02", category: "retratos", src: "/fotos/retratos/1.jpg", caption: "Ensaio em família — estúdio", featured: false, selected: true, order: 2 },
@@ -67,6 +69,10 @@ export const PORTFOLIO_DATA: PortfolioData = {
     { id: "ret-06", category: "retratos", src: "/fotos/retratos/7.jpg", caption: "Abraço e intimidade a dois", featured: false, selected: true, order: 6 },
     { id: "ret-07", category: "retratos", src: "/fotos/retratos/10.jpg", caption: "Doce espera — maternidade", featured: false, selected: true, order: 7 },
     { id: "ret-08", category: "retratos", src: "/fotos/retratos/11.jpg", caption: "Retrato em luz suave", featured: false, selected: true, order: 8 },
+    { id: "ret-09", category: "retratos", src: "/fotos/retratos/2.jpg", caption: "Retrato de família — união e carinho", featured: false, selected: true, order: 9 },
+    { id: "ret-10", category: "retratos", src: "/fotos/retratos/5.jpg", caption: "Pai e filho — leveza e diversão", featured: false, selected: true, order: 10 },
+    { id: "ret-11", category: "retratos", src: "/fotos/retratos/8.jpg", caption: "Casal — troca de olhares", featured: false, selected: true, order: 11 },
+    { id: "ret-12", category: "retratos", src: "/fotos/retratos/12.jpg", caption: "Retrato autoral — atitude & estilo", featured: false, selected: true, order: 12 },
 
     { id: "edi-01", category: "editorial", src: "/fotos/editorial/foto_perfil.jpeg", caption: "Sabrina Carneiro — Editorial & Visão", featured: true, selected: true, order: 1 },
     { id: "edi-02", category: "editorial", src: "/fotos/retratos/12.jpg", caption: "Retrato autoral — atitude & estilo", featured: false, selected: true, order: 2 },

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { clone, buildExportSource } from "@/lib/adminHelpers";
-import { loadDraft, saveDraft, clearDraft } from "@/lib/portfolioHelpers";
+import { addPhoto, removePhoto, selectThemePreset, updatePhoto, updateTheme } from "@/lib/actions/portfolio";
 import { BackArrowIcon, AlertIcon } from "../icons";
 import AdminSummary from "./AdminSummary";
 import AddPhotoForm from "./AddPhotoForm";
@@ -13,43 +13,44 @@ import type { PortfolioData, Photo } from "@/lib/types";
 import ThemeCustomizer from "./ThemeCustomizer";
 import { DEFAULT_THEME, type ThemeConfig } from "@/lib/themes";
 
-function timeNow(): string {
-  const d = new Date();
-  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-}
-
 export default function AdminApp({ initialData }: { initialData: PortfolioData }) {
   const [state, setState] = useState<PortfolioData>(initialData);
-  const [status, setStatus] = useState("Alterações são salvas automaticamente neste navegador.");
+  const [status, setStatus] = useState("Alterações são salvas direto no banco de dados.");
   const [statusError, setStatusError] = useState(false);
-  
-  useEffect(() => {
-    const draft = loadDraft();
-    if (draft) setState(draft);
-  }, []);
+  const [isPending, startTransition] = useTransition();
 
-  function persist(next: PortfolioData, message?: string) {
-    setState(next);
-    try {
-      saveDraft(next);
-      setStatus(message || "Alterações salvas neste navegador às " + timeNow() + ".");
-      setStatusError(false);
-    } catch {
-      setStatus("Não foi possível salvar automaticamente (armazenamento local indisponível).");
-      setStatusError(true);
-    }
+  const pendingPatches = useRef<Record<string, Partial<Photo>>>({});
+  const pendingTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  function runStatus(promise: Promise<unknown>, okMessage: string, errMessage: string) {
+    startTransition(async () => {
+      try {
+        await promise;
+        setStatus(okMessage);
+        setStatusError(false);
+      } catch {
+        setStatus(errMessage);
+        setStatusError(true);
+      }
+    });
   }
 
   function handleThemeChange(patch: Partial<ThemeConfig>) {
     const next = clone(state);
     next.theme = { ...(next.theme || DEFAULT_THEME), ...patch };
-    persist(next, "Cores personalizadas — salvo às " + timeNow() + ".");
+    setState(next);
+    runStatus(updateTheme(patch), "Cores personalizadas — salvas no banco.", "Não foi possível salvar as cores.");
   }
 
   function handleSelectPreset(preset: ThemeConfig) {
     const next = clone(state);
     next.theme = clone(preset);
-    persist(next, `Paleta "${preset.name}" aplicada — salvo às ` + timeNow() + ".");
+    setState(next);
+    runStatus(
+      selectThemePreset(preset),
+      `Paleta "${preset.name}" aplicada — salva no banco.`,
+      "Não foi possível aplicar a paleta."
+    );
   }
 
   function handleChange(id: string, patch: Partial<Photo>) {
@@ -57,7 +58,15 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
     const photo = next.photos.find((p) => p.id === id);
     if (!photo) return;
     Object.assign(photo, patch);
-    persist(next);
+    setState(next);
+
+    pendingPatches.current[id] = { ...pendingPatches.current[id], ...patch };
+    if (pendingTimers.current[id]) clearTimeout(pendingTimers.current[id]);
+    pendingTimers.current[id] = setTimeout(() => {
+      const toSend = pendingPatches.current[id];
+      delete pendingPatches.current[id];
+      runStatus(updatePhoto(id, toSend), "Alterações salvas no banco.", "Não foi possível salvar essa alteração.");
+    }, 500);
   }
 
   function handleRemove(photo: Photo) {
@@ -66,23 +75,29 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
     }
     const next = clone(state);
     next.photos = next.photos.filter((p) => p.id !== photo.id);
-    persist(next, "Foto removida da lista — salvo às " + timeNow() + ".");
+    setState(next);
+    runStatus(removePhoto(photo.id), "Foto removida da lista — salvo no banco.", "Não foi possível remover a foto.");
   }
 
-  function handleAdd(newPhoto: Omit<Photo, "order">) {
-    const next = clone(state);
-    const siblings = next.photos.filter((p) => p.category === newPhoto.category);
-    const nextOrder = siblings.reduce((max, p) => Math.max(max, p.order || 0), 0) + 1;
-    next.photos.push({ ...newPhoto, order: nextOrder });
-    persist(next, "Foto adicionada — salvo às " + timeNow() + ".");
-  }
-
-  function handleReset() {
-    if (!window.confirm("Restaurar os dados originais? Isso descarta suas alterações salvas neste navegador.")) return;
-    clearDraft();
-    setState(clone(initialData));
-    setStatus("Dados restaurados ao padrão original.");
-    setStatusError(false);
+  function handleAdd(newPhoto: Omit<Photo, "id" | "order">) {
+    startTransition(async () => {
+      try {
+        const created = await addPhoto({
+          categorySlug: newPhoto.category,
+          src: newPhoto.src,
+          caption: newPhoto.caption,
+          featured: newPhoto.featured,
+        });
+        const next = clone(state);
+        next.photos.push({ ...newPhoto, id: created.id, order: created.order });
+        setState(next);
+        setStatus("Foto adicionada — salva no banco.");
+        setStatusError(false);
+      } catch {
+        setStatus("Não foi possível adicionar a foto. Confira se a categoria existe.");
+        setStatusError(true);
+      }
+    });
   }
 
   function handleExport() {
@@ -90,12 +105,12 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "portfolioData.ts";
+    a.download = "portfolio-backup.ts";
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    setStatus("portfolioData.ts exportado. Substitua lib/portfolioData.ts por ele antes de publicar.");
+    setStatus("Backup em JSON/TS baixado (não é mais o mecanismo de publicação — o banco já é a fonte de verdade).");
     setStatusError(false);
   }
 
@@ -120,7 +135,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
             role="status"
             aria-live="polite"
           >
-            {status}
+            {isPending ? "Salvando…" : status}
           </p>
         </div>
       </header>
@@ -131,7 +146,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
           <p>
             Esta página não fica no menu do site, mas o endereço não é secreto — qualquer pessoa com o link consegue
             abrir. Pra proteger de verdade, ative a senha de acesso do seu provedor de hospedagem (veja o README do
-            projeto).
+            projeto). Login de verdade chega na próxima fase.
           </p>
         </div>
       </div>
@@ -162,7 +177,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
         ))}
       </main>
 
-      <AdminActions onReset={handleReset} onExport={handleExport} />
+      <AdminActions onExport={handleExport} />
     </div>
   );
 }

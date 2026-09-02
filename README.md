@@ -6,98 +6,126 @@ scrapbook romântico ("Diário de Set"), a partir de uma referência visual
 caligrafia, fotos em recorte de coração e em polaroid com fita, laço e
 detalhes dourados.
 
-> **Status da migração**: O projeto está 100% convertido para **React (Next.js 15 App Router com TypeScript)**, totalmente tipado e com build validado com sucesso (`npm run build`).
+> **Status da migração**: O projeto está 100% convertido para **React (Next.js 15 App Router com TypeScript)**, totalmente tipado e com build validado com sucesso (`npm run build`). Persistência migrou de `localStorage` pra **Postgres via Prisma** (ver seção "Como rodar com Docker" abaixo). Isso é a **Fase 1** de um plano maior de virar multi-tenant (login por fotógrafa, `/[slug]` público, upload real de foto) — as fases seguintes ainda não foram implementadas.
 
-## Limpeza necessária antes de rodar
+## Como rodar com Docker (Postgres + Next.js) — forma recomendada
 
-Este projeto passou por duas migrações (estático → Next.js → TypeScript) e
-eu não consigo apagar arquivo nenhum nesta sessão (shell quebrado, e a
-pasta não é um repositório git — sem controle de versão, apagar por
-engano é definitivo, então preferi listar em vez de arriscar). **Dois
-grupos de arquivo antigo precisam ser apagados por você antes do primeiro
-`npm install`/`npm run dev`:**
+Pré-requisito: [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando.
 
-1. O site estático original (pré-Next.js) — nunca mais usado.
-2. As versões `.js`/`.jsx` dos componentes Next.js — substituídas pelas
-   `.ts`/`.tsx` equivalentes. **Se ficarem os dois, o build quebra**
-   (Next.js não aceita `app/page.js` e `app/page.tsx` juntos, por exemplo).
-
-Rode isto na raiz do projeto (PowerShell):
+**1) Criar seu `.env` local** (baseado em `.env.example` — nunca vai pro git):
 
 ```powershell
-Remove-Item -Force index.html, admin.html, jsconfig.json, .impeccable-test.txt
-Remove-Item -Recurse -Force js, fotos
-Remove-Item -Force app\layout.js, app\page.js, app\admin\layout.js, app\admin\page.js
-Remove-Item -Force lib\portfolioData.js, lib\portfolioHelpers.js, lib\adminHelpers.js, lib\useReveal.js
-Remove-Item -Force components\icons.js, components\PhotoFrame.js, components\Reveal.js, components\HeartClipDefs.js, components\TopBar.js, components\Hero.js, components\AlbumSection.js, components\AboutSection.js, components\ContactSection.js, components\Footer.js, components\PortfolioSite.js
-Remove-Item -Force components\admin\PhotoRow.js, components\admin\CategoryTable.js, components\admin\AdminSummary.js, components\admin\AddPhotoForm.js, components\admin\AdminActions.js, components\admin\AdminApp.js
+Copy-Item .env.example .env
 ```
 
-Ou em Bash/Git Bash:
+**2) Criar e aplicar a primeira migration do banco.** Isso builda a imagem
+Docker (na primeira vez), sobe o Postgres, cria as tabelas em
+`prisma/migrations/` e já roda o seed automaticamente no final (copia o
+conteúdo que hoje está em `lib/portfolioData.ts` pro banco):
 
-```bash
-rm -f index.html admin.html jsconfig.json .impeccable-test.txt
-rm -rf js fotos
-rm -f app/layout.js app/page.js app/admin/layout.js app/admin/page.js
-rm -f lib/portfolioData.js lib/portfolioHelpers.js lib/adminHelpers.js lib/useReveal.js
-rm -f components/icons.js components/PhotoFrame.js components/Reveal.js components/HeartClipDefs.js components/TopBar.js components/Hero.js components/AlbumSection.js components/AboutSection.js components/ContactSection.js components/Footer.js components/PortfolioSite.js
-rm -f components/admin/PhotoRow.js components/admin/CategoryTable.js components/admin/AdminSummary.js components/admin/AddPhotoForm.js components/admin/AdminActions.js components/admin/AdminApp.js
+```powershell
+docker compose run --rm app npx prisma migrate dev --name init
 ```
 
-**Não apaga** (ainda em uso): `css/tokens.css`, `css/site.css`,
-`css/admin.css` (importados de dentro de `app/`), e `public/fotos/`
-(a pasta nova pra fotos reais).
+> ⚠️ Não pule direto pro passo 3. O serviço `migrate` do
+> `docker-compose.yml` só *aplica* migrations que já existem (`prisma
+> migrate deploy`) — ele não cria a primeira sozinho. Sem rodar este
+> comando antes, o banco sobe sem nenhuma tabela.
 
-## Como rodar
+Espere ver no final algo como:
+```
+Seed concluído. Login de teste: sabrina@example.com / senha123
+```
+
+**3) Subir tudo normalmente (Postgres + app em modo dev, hot reload ligado):**
+
+```powershell
+docker compose up
+```
+
+Espere o serviço `app` mostrar que o Next.js está pronto (`Ready in ...`).
+Abra `http://localhost:3000` (site público, dados vindo do Postgres) e
+`http://localhost:3000/admin` (área da fotógrafa — ainda sem login, isso é
+Fase 2 do plano).
+
+**Comandos do dia a dia:**
+
+| O que você quer | Comando |
+| --- | --- |
+| Parar tudo | `docker compose down` (mantém os dados do banco) |
+| Parar e **apagar** os dados do Postgres | `docker compose down -v` |
+| Ver as tabelas/linhas do banco numa UI | `docker compose run --rm app npx prisma studio` (abre em `http://localhost:5555`) |
+| Rodar o seed de novo manualmente | `docker compose run --rm app npm run db:seed` |
+| Criar uma nova migration depois de editar `prisma/schema.prisma` | `docker compose run --rm app npx prisma migrate dev --name <descricao>` |
+| Ver logs só do app | `docker compose logs -f app` |
+
+**Confirmar que não é mais localStorage**: edite uma legenda em `/admin`,
+rode `docker compose restart app` numa outra janela de terminal, e recarregue
+a página — a edição continua lá (antes, um restart do processo não mudava
+nada porque tudo vivia no navegador; agora o dado sobrevive porque está no
+Postgres).
+
+## Como rodar sem Docker (alternativa)
+
+Só faz sentido se você já tem um Postgres rodando em outro lugar (local,
+Neon, Supabase etc.) e sabe a `DATABASE_URL` dele.
 
 ```bash
 npm install
+# edite .env com a DATABASE_URL do seu Postgres
+npx prisma migrate dev --name init
 npm run dev
 ```
 
-Abra `http://localhost:3000` (site público) e `http://localhost:3000/admin`
-(área da fotógrafa).
-
 Pra build de produção: `npm run build` seguido de `npm run start`.
-`npm run build` também type-checa o projeto — é o primeiro lugar onde
-qualquer erro de TypeScript que eu tenha deixado passar vai aparecer.
+`npm run build` também type-checa o projeto.
 
 ## Estrutura
 
 ```
 app/
   layout.tsx           → layout raiz: importa globals.css (Tailwind), <html>/<body>
-  page.tsx              → rota "/" — monta PortfolioSite com os dados
+  page.tsx              → rota "/" — busca o portfolio no Postgres (Prisma) e monta PortfolioSite
   admin/
     layout.tsx           → metadata (noindex)
-    page.tsx               → rota "/admin" — monta AdminApp
+    page.tsx               → rota "/admin" — busca o portfolio no Postgres e monta AdminApp
 
 components/
-  PortfolioSite.tsx     → client component: faz merge com rascunho do localStorage
+  PortfolioSite.tsx     → client component: só renderiza os dados recebidos do servidor
   TopBar.tsx, Hero.tsx, AlbumSection.tsx, AboutSection.tsx, ContactSection.tsx, Footer.tsx
   PhotoFrame.tsx         → moldura de foto (coração ou polaroid), com fade-in
   Reveal.tsx              → wrapper genérico de fade-in ao rolar a página
   icons.tsx                → ícones SVG desenhados, como componentes React
-  admin/                     → AdminApp, AdminSummary, AddPhotoForm, CategoryTable, PhotoRow, AdminActions
+  admin/                     → AdminApp (chama as Server Actions), AdminSummary, AddPhotoForm, CategoryTable, PhotoRow, AdminActions
 
 lib/
-  types.ts              → tipos compartilhados (Photo, Category, Photographer, PortfolioData)
-  portfolioData.ts        → TODO o conteúdo do site (nome, bio, contato, fotos)
-  portfolioHelpers.ts       → seleção de fotos por categoria + leitura/escrita do rascunho local
-  adminHelpers.ts             → clone, slugify, exportação de dados
-  useReveal.ts                 → hook do fade-in ao rolar
+  types.ts              → tipos compartilhados (Photo, Category, Photographer, PortfolioData) — o "formato" que os componentes esperam
+  portfolioData.ts        → conteúdo original de exemplo; hoje só é usado por prisma/seed.ts pra popular o banco na primeira vez
+  portfolioMapper.ts        → converte uma linha do Postgres (Prisma) de volta pro formato de lib/types.ts
+  portfolioHelpers.ts         → seleção de fotos por categoria
+  adminHelpers.ts               → clone, slugify, exportação de backup
+  db.ts                           → cliente do Prisma (conexão com o Postgres)
+  actions/
+    portfolio.ts                   → Server Actions: updatePhoto, removePhoto, addPhoto, updateTheme, selectThemePreset
+
+prisma/
+  schema.prisma          → modelo do banco (User, Portfolio, Theme, Category, Photo)
+  seed.ts                 → popula o banco com o conteúdo de lib/portfolioData.ts
+  migrations/               → histórico de mudanças no banco (gerado por `prisma migrate dev`, deve ir pro git)
 
 public/fotos/           → onde as fotos reais devem entrar (ver public/fotos/LEIA-ME.md)
+
+docker-compose.yml, Dockerfile → Postgres + app rodando em Docker (ver "Como rodar com Docker")
 ```
 
 ## O que ainda é placeholder (preencher antes de publicar)
 
-Tudo isso está claramente marcado no próprio site e em `lib/portfolioData.ts`:
-
-- Nome da fotógrafa, cidade, bio, e-mail, telefone, Instagram, WhatsApp.
-- As 15 fotos de exemplo (5 por categoria) — hoje aparecem como quadros
-  "substitua" numerados. Veja `public/fotos/LEIA-ME.md` pra como trocar
-  por fotos reais.
+- E-mail de contato (`contato@substituir.com` no seed) — troque pelo
+  e-mail real em `/admin` ou editando `prisma/seed.ts` antes de rodar o
+  seed pela primeira vez.
+- As fotos de `public/fotos/` são reais, mas de um outro ensaio (usadas
+  como conteúdo de exemplo pra ter o site inteiro navegável). Veja
+  `public/fotos/LEIA-ME.md` pra trocar por fotos da cliente de verdade.
 
 Nenhum dado comercial foi inventado (sem depoimentos falsos, sem números
 de "anos de experiência" ou "clientes atendidos") — a copy é só texto de
@@ -109,14 +137,17 @@ posicionamento genérico, marcado pra revisão.
 2. Marcar quais fotos aparecem ("Mostrar"), qual é destaque, ordem e legenda.
 3. Pra adicionar uma foto nova: copiar o arquivo pra `public/fotos/<categoria>/`
    e cadastrar ali mesmo na tela.
-4. Clicar em **"Exportar dados atualizados"** — baixa um novo `portfolioData.ts`.
-5. Substituir o arquivo `lib/portfolioData.ts` do projeto pelo baixado.
-6. Rodar `npm run build` (ou fazer o deploy, que builda automaticamente).
 
-As alterações feitas em `/admin` também ficam salvas automaticamente
-nesse navegador (`localStorage`), então dá pra clicar em "Ver site" e
-conferir antes de exportar — mas só exportar e trocar `lib/portfolioData.ts`
-de fato muda o que os visitantes veem depois do próximo deploy.
+Cada alteração já é salva direto no Postgres (poucos segundos de debounce
+pra campos de texto, pra não escrever no banco a cada tecla) — não existe
+mais passo de "exportar e substituir arquivo": o que aparece pra você em
+`/admin` já é o que os visitantes veem no site público, sem precisar de
+build/deploy novo. O botão "Exportar dados atualizados" continua existindo
+só como um backup em arquivo `.ts`, não é mais o mecanismo de publicação.
+
+`/admin` ainda não tem login (isso é a Fase 2 do plano — ver nota no topo
+deste README) — por enquanto, qualquer pessoa com o endereço consegue
+abrir e editar.
 
 ## Publicar o site
 

@@ -1,0 +1,100 @@
+// Documentação completa: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Uma conta de login. Cada User tem no máximo um Portfolio (1-para-1).
+// Ainda não é usado na Fase 1 (sem login), mas já modelamos certo agora
+// pra não precisar migrar o schema de novo na Fase 2.
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  portfolio    Portfolio?
+}
+
+// O site de uma fotógrafa. Tudo que hoje está em lib/portfolioData.ts vira
+// linhas aqui, uma "árvore" por fotógrafa (Portfolio -> Theme/Category/Photo).
+model Portfolio {
+  id               String     @id @default(cuid())
+  userId           String     @unique
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug             String     @unique
+  photographerName String
+  role             String?
+  location         String?
+  bio              String?    @db.Text
+  email            String?
+  phone            String?
+  instagram        String?
+  whatsapp         String?
+  avatar           String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  theme      Theme?
+  categories Category[]
+  photos     Photo[]
+}
+
+// Corresponde a ThemeConfig em lib/themes.ts.
+model Theme {
+  id          String    @id @default(cuid())
+  portfolioId String    @unique
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  presetId    String    @default("romantico")
+  name        String
+  description String    @default("")
+  bgPrimary   String
+  bgTint      String
+  accentColor String
+  accentInk   String
+  textColor   String
+  fontFamily  String    @default("hand") // "hand" | "serif" | "sans"
+}
+
+// Corresponde a Category em lib/types.ts. "slug" substitui o antigo
+// Category.id (ex: "casamentos") — agora único só DENTRO do portfólio
+// (@@unique([portfolioId, slug])), não globalmente, porque duas fotógrafas
+// diferentes podem ter cada uma sua própria categoria "casamentos".
+model Category {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  slug        String
+  page        String
+  label       String
+  status      String?
+  note        String?
+  order       Int       @default(0)
+  photos      Photo[]
+
+  @@unique([portfolioId, slug])
+}
+
+// Corresponde a Photo em lib/types.ts. Também referencia portfolioId
+// diretamente (além de categoryId) — deixa a consulta "todas as fotos
+// desta fotógrafa" simples e ajuda a impor a regra de segurança de só
+// mutar fotos que pertencem ao portfolio do usuário logado.
+model Photo {
+  id          String    @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  src         String?
+  caption     String?
+  featured    Boolean   @default(false)
+  selected    Boolean   @default(true)
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+}
