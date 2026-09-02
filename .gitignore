@@ -5,6 +5,10 @@
 /.next/
 /out/
 
+# fotos enviadas pelo upload do /admin (Fase 3) — ficam num volume Docker,
+# não fazem sentido versionados no git
+/public/uploads/
+
 # production
 /build
 

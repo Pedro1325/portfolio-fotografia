@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { clone, buildExportSource } from "@/lib/adminHelpers";
-import { addPhoto, removePhoto, selectThemePreset, updatePhoto, updateTheme } from "@/lib/actions/portfolio";
+import { removePhoto, selectThemePreset, updatePhoto, updateTheme, uploadPhoto, type UploadPhotoResult } from "@/lib/actions/portfolio";
 import { BackArrowIcon, AlertIcon } from "../icons";
 import AdminSummary from "./AdminSummary";
 import AddPhotoForm from "./AddPhotoForm";
@@ -80,25 +80,18 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
     runStatus(removePhoto(photo.id), "Foto removida da lista — salvo no banco.", "Não foi possível remover a foto.");
   }
 
-  function handleAdd(newPhoto: Omit<Photo, "id" | "order">) {
-    startTransition(async () => {
-      try {
-        const created = await addPhoto({
-          categorySlug: newPhoto.category,
-          src: newPhoto.src,
-          caption: newPhoto.caption,
-          featured: newPhoto.featured,
-        });
-        const next = clone(state);
-        next.photos.push({ ...newPhoto, id: created.id, order: created.order });
-        setState(next);
-        setStatus("Foto adicionada — salva no banco.");
-        setStatusError(false);
-      } catch {
-        setStatus("Não foi possível adicionar a foto. Confira se a categoria existe.");
-        setStatusError(true);
-      }
-    });
+  async function handleUpload(formData: FormData): Promise<UploadPhotoResult> {
+    // Diferente dos outros handlers: aqui a gente espera a resposta do
+    // servidor ANTES de mexer no estado local — o arquivo em si só existe
+    // depois do upload terminar, não tem como "otimisticamente" mostrar
+    // uma foto que ainda não foi salva em disco.
+    const result = await uploadPhoto(formData);
+    if (!("error" in result)) {
+      const next = clone(state);
+      next.photos.push(result);
+      setState(next);
+    }
+    return result;
   }
 
   function handleExport() {
@@ -124,7 +117,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
             href="/"
           >
             <BackArrowIcon className="w-4 h-4" />
-            Ver site
+            Ver Portfolio
           </Link>
           <h1 className="font-display text-2xl md:text-3xl text-brand-ink">Área da fotógrafa</h1>
           <div className="flex items-center gap-3">
@@ -168,7 +161,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
           />
         <AddPhotoForm
           categories={state.categories}
-          onAdd={handleAdd}
+          onUpload={handleUpload}
           onStatus={(msg, err) => {
             setStatus(msg);
             setStatusError(!!err);

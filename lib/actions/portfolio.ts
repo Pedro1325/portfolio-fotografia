@@ -1,5 +1,9 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -46,36 +50,103 @@ export async function removePhoto(photoId: string) {
   revalidatePath("/");
 }
 
-export async function addPhoto(input: {
-  categorySlug: string;
-  src: string | null;
-  caption: string;
-  featured: boolean;
-}) {
+const ALLOWED_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB
+
+/**
+ * Local (Docker): grava em public/uploads/<categoria>/ — cai dentro do
+ * volume Docker "uploads_data" (ver docker-compose.yml), sobrevivendo a
+ * rebuild do container.
+ *
+ * Produção (Vercel): não existe disco persistente em serverless — um
+ * arquivo escrito assim desaparece no próximo deploy (ou já nem
+ * funciona, o sistema de arquivos é somente leitura). Por isso, quando a
+ * Vercel injeta BLOB_READ_WRITE_TOKEN automaticamente (ao conectar um
+ * Blob Store ao projeto), a gente sobe pro Vercel Blob em vez de disco —
+ * sem precisar mudar nada no fluxo de trabalho local.
+ */
+async function saveUploadedFile(categorySlug: string, filename: string, file: File): Promise<string> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`${categorySlug}/${filename}`, file, { access: "public" });
+    return blob.url;
+  }
+
+  const uploadDir = path.join(process.cwd(), "public", "uploads", categorySlug);
+  await mkdir(uploadDir, { recursive: true });
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await writeFile(path.join(uploadDir, filename), buffer);
+  return `/uploads/${categorySlug}/${filename}`;
+}
+
+export type UploadPhotoResult =
+  | { error: string }
+  | { id: string; category: string; src: string; caption: string; featured: boolean; selected: boolean; order: number };
+
+export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult> {
   const portfolioId = await getCurrentPortfolioId();
-  const category = await prisma.category.findFirstOrThrow({
-    where: { portfolioId, slug: input.categorySlug },
+
+  const categorySlug = String(formData.get("category") || "");
+  const caption = String(formData.get("caption") || "").trim();
+  const featured = formData.get("featured") === "on";
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Selecione um arquivo de imagem." };
+  }
+  const ext = ALLOWED_TYPES[file.type];
+  if (!ext) {
+    return { error: "Formato não aceito. Envie um arquivo JPG, PNG ou WebP." };
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: "Arquivo muito grande (máximo 8MB)." };
+  }
+
+  const category = await prisma.category.findFirst({
+    where: { portfolioId, slug: categorySlug },
     select: { id: true },
   });
+  if (!category) {
+    return { error: "Categoria não encontrada." };
+  }
+
+  // Nome gerado no servidor (não o nome original do arquivo) — evita dois
+  // problemas de uma vez: nomes repetidos sobrescrevendo foto antiga, e
+  // caracteres/caminho maliciosos vindos de um nome de arquivo não confiável.
+  const filename = `${randomUUID()}.${ext}`;
+  const src = await saveUploadedFile(categorySlug, filename, file);
+
   const last = await prisma.photo.findFirst({
     where: { portfolioId, categoryId: category.id },
     orderBy: { order: "desc" },
     select: { order: true },
   });
+
   const created = await prisma.photo.create({
     data: {
       portfolioId,
       categoryId: category.id,
-      src: input.src,
-      caption: input.caption,
-      featured: input.featured,
+      src,
+      caption,
+      featured,
       selected: true,
       order: (last?.order ?? 0) + 1,
     },
-    select: { id: true, order: true },
   });
+
   revalidatePath("/");
-  return created;
+  return {
+    id: created.id,
+    category: categorySlug,
+    src: created.src as string,
+    caption: created.caption ?? "",
+    featured: created.featured,
+    selected: created.selected,
+    order: created.order,
+  };
 }
 
 type ThemePatch = Partial<

@@ -1,7 +1,4 @@
 services:
-  # Banco Postgres. Guarda os dados de verdade em um volume nomeado
-  # (db_data), então eles sobrevivem a "docker compose down" / rebuilds —
-  # só somem se você rodar "docker compose down -v".
   db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -10,12 +7,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-portfolio}
       POSTGRES_DB: ${POSTGRES_DB:-portfolio}
     ports:
-      # 5433 (não 5432) do lado de fora — evita conflito com um Postgres
-      # que já esteja rodando no seu Windows. Por dentro da rede do
-      # Docker os outros serviços continuam falando com "db:5432"
-      # normalmente (é assim que o DATABASE_URL no .env funciona), essa
-      # porta só importa se você quiser conectar um cliente de fora
-      # (ex: DBeaver/pgAdmin) usando localhost:5433.
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
@@ -25,11 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # Roda "prisma migrate deploy" UMA VEZ e sai. Não fica no ar — o "app"
-  # só sobe depois que este serviço termina com sucesso (veja depends_on
-  # abaixo). Separado do "app" de propósito: se colocássemos a migration
-  # dentro do comando do "app", ela rodaria de novo a cada restart do
-  # container, o que trava/quebra quando o schema já está migrado.
   migrate:
     build:
       context: .
@@ -42,14 +28,10 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:-portfolio}@db:5432/${POSTGRES_DB:-portfolio}
     volumes:
-      # Sem isso, este serviço só enxerga o código de quando a imagem foi
-      # construída — não veria a pasta prisma/migrations criada depois
-      # (foi exatamente isso que causou o "No migration found").
       - .:/app
       - /app/node_modules
     command: npx prisma migrate deploy
 
-  # A aplicação Next.js em modo dev (hot reload).
   app:
     build:
       context: .
@@ -64,20 +46,11 @@ services:
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
     ports:
-      # 3001 (não 3000) do lado de fora — evita conflito com algo que já
-      # esteja usando a porta 3000 no seu Windows (ex: um "npm run dev"
-      # antigo ainda aberto em outra janela de terminal).
-      - "3001:3000"
+      - "3000:3000"
     volumes:
-      # Seu código local dentro do container, pra hot reload funcionar.
       - .:/app
-      # Estes dois "sobrescrevem" as pastas acima com o volume anônimo do
-      # container — sem isso, o node_modules do Windows (montado por cima)
-      # apagaria o node_modules instalado no Linux dentro da imagem.
       - /app/node_modules
       - /app/.next
-      # Fotos enviadas pelo upload (Fase 3) ficam aqui, sobrevivendo a
-      # rebuilds do container.
       - uploads_data:/app/public/uploads
     command: npm run dev
 

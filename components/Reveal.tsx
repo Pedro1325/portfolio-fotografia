@@ -11,6 +11,7 @@ interface RevealProps {
 }
 export default function Reveal({ as: Tag = "div", className = "", children, ...props }: RevealProps) {
   const [ref, visible] = useReveal<Element>();
+
   const Component = Tag as any;
   return (
     <Component

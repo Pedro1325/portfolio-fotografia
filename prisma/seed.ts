@@ -3,17 +3,35 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/db";
 import { PORTFOLIO_DATA } from "../lib/portfolioData";
 
-const DEV_EMAIL = "sabrina@example.com";
-const DEV_PASSWORD = "senha123"; 
+// Credenciais da ÚNICA conta de admin vêm do .env (nunca do código —
+// .env está no .gitignore, então isso nunca vai pro histórico do git).
+// Sem ADMIN_EMAIL/ADMIN_PASSWORD configurados, o seed recusa a rodar em
+// vez de inventar uma senha padrão previsível.
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 async function main() {
-  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10);
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    throw new Error(
+      "Defina ADMIN_EMAIL e ADMIN_PASSWORD no seu .env antes de rodar o seed (veja .env.example)."
+    );
+  }
+  if (ADMIN_PASSWORD.length < 8) {
+    throw new Error("ADMIN_PASSWORD precisa ter pelo menos 8 caracteres.");
+  }
 
+  const email = ADMIN_EMAIL.trim().toLowerCase();
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+  // upsert por e-mail: se você trocar o ADMIN_EMAIL no .env depois de já
+  // ter rodado o seed uma vez, isso cria uma conta NOVA em vez de
+  // renomear a antiga — rode `docker compose down -v` antes de reseedar
+  // se quiser garantir que só existe uma conta de admin no banco.
   const user = await prisma.user.upsert({
-    where: { email: DEV_EMAIL },
-    update: {},
+    where: { email },
+    update: { passwordHash },
     create: {
-      email: DEV_EMAIL,
+      email,
       passwordHash,
       name: PORTFOLIO_DATA.photographer.name,
     },
@@ -92,7 +110,7 @@ async function main() {
     }
   }
 
-  console.log(`Seed concluído. Login de teste: ${DEV_EMAIL} / ${DEV_PASSWORD}`);
+  console.log(`Seed concluído. Login: ${email} (senha definida no seu .env).`);
 }
 
 main()
