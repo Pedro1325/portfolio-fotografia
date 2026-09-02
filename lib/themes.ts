@@ -14,7 +14,7 @@ export interface ThemeConfig {
 export const THEME_PRESETS: ThemeConfig[] =  [
     {
         id: "romantico",
-        name: "🌸 Romântico Scrapbook",
+        name: " Romântico Scrapbook",
         description: "Tons suaves de rosa, papel creme e laços rosé.",
         bgPrimary: "#fdf4ee",
         bgTint: "#fbe9ee",
@@ -25,7 +25,7 @@ export const THEME_PRESETS: ThemeConfig[] =  [
       },
       {
         id: "editorial-dark",
-        name: "🖤 Editorial Noturno",
+        name: " Editorial Noturno",
         description: "Fundo escuro dramático com toques de bronze.",
         bgPrimary: "#141213",
         bgTint: "#1e1b1c",
@@ -36,7 +36,7 @@ export const THEME_PRESETS: ThemeConfig[] =  [
       },
       {
         id: "terracota",
-        name: "🌿 Terracota & Linho",
+        name: " Terracota & Linho",
         description: "Tons terrosos aconchegantes e acolhedores.",
         bgPrimary: "#fcf8f2",
         bgTint: "#f5ece1",
@@ -47,7 +47,7 @@ export const THEME_PRESETS: ThemeConfig[] =  [
       },
       {
         id: "lavanda",
-        name: "💜 Lavanda & Poesia",
+        name: " Lavanda & Poesia",
         description: "Lilás suave e elegante para ensaios artísticos.",
         bgPrimary: "#f8f6fc",
         bgTint: "#eeeaf7",

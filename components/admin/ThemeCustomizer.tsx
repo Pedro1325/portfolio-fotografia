@@ -181,9 +181,9 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
               onChange={(e) => onChange({ fontFamily: e.target.value as ThemeConfig["fontFamily"], id: "custom" })}
               className="w-full px-2 py-1 text-xs bg-brand-bg border border-brand-line rounded focus:outline-none focus:ring-1 focus:ring-brand-accent-deep text-brand-ink"
             >
-              <option value="hand">🌸 Tema Rose / Romântica (Alex Brush + Caveat)</option>
-              <option value="serif">🖤 Tema Dark Editorial (Serifada)</option>
-              <option value="sans">🌿 Tema Clean / Linho (Poppins)</option>
+              <option value="hand"> Tema Rose / Romântica (Alex Brush + Caveat)</option>
+              <option value="serif"> Tema Dark Editorial (Serifada)</option>
+              <option value="sans"> Tema Clean / Linho (Poppins)</option>
             </select>
           </div>
         </div>

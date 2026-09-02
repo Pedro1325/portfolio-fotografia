@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { clone, buildExportSource } from "@/lib/adminHelpers";
 import { addPhoto, removePhoto, selectThemePreset, updatePhoto, updateTheme } from "@/lib/actions/portfolio";
 import { BackArrowIcon, AlertIcon } from "../icons";
@@ -126,17 +127,26 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
             Ver site
           </Link>
           <h1 className="font-display text-2xl md:text-3xl text-brand-ink">Área da fotógrafa</h1>
-          <p
-            className={`text-xs font-medium px-3 py-1 rounded-full ${
-              statusError
-                ? "bg-rose-100 text-rose-700 border border-rose-200"
-                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-            }`}
-            role="status"
-            aria-live="polite"
-          >
-            {isPending ? "Salvando…" : status}
-          </p>
+          <div className="flex items-center gap-3">
+            <p
+              className={`text-xs font-medium px-3 py-1 rounded-full ${
+                statusError
+                  ? "bg-rose-100 text-rose-700 border border-rose-200"
+                  : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {isPending ? "Salvando…" : status}
+            </p>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-xs font-semibold uppercase tracking-wider text-brand-ink-soft hover:text-rose-700 transition-colors"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
@@ -144,9 +154,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
         <div className="p-4 bg-amber-50/80 border border-amber-200/80 rounded-card flex items-start gap-3 text-xs text-amber-900 shadow-sm">
           <AlertIcon className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <p>
-            Esta página não fica no menu do site, mas o endereço não é secreto — qualquer pessoa com o link consegue
-            abrir. Pra proteger de verdade, ative a senha de acesso do seu provedor de hospedagem (veja o README do
-            projeto). Login de verdade chega na próxima fase.
+            Esta página está protegida por login — só você, autenticada, consegue editar por aqui.
           </p>
         </div>
       </div>

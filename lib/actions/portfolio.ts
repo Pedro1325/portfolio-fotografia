@@ -1,18 +1,25 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { ThemeConfig } from "@/lib/themes";
 
 /**
- * FASE 1: ainda não existe login (isso vem na Fase 2), então "a fotógrafa
- * atual" é sempre a primeira linha da tabela Portfolio — a que o
- * `prisma/seed.ts` criou. Na Fase 2 essa função vira "pega o portfolio do
- * usuário da sessão" e o resto das actions abaixo praticamente não muda,
- * porque já filtram tudo por portfolioId.
+ * FASE 2: agora que existe login, "a fotógrafa atual" é quem estiver
+ * autenticada na sessão — nunca um id que o cliente mandou (só assim dá
+ * pra garantir que uma fotógrafa não edita o portfolio de outra). Isso é
+ * chamado em toda action abaixo antes de qualquer escrita no banco.
  */
 async function getCurrentPortfolioId(): Promise<string> {
-  const portfolio = await prisma.portfolio.findFirstOrThrow({ select: { id: true } });
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Não autenticado.");
+
+  const portfolio = await prisma.portfolio.findUniqueOrThrow({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
   return portfolio.id;
 }
 
