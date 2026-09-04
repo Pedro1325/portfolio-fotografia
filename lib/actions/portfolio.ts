@@ -57,18 +57,7 @@ const ALLOWED_TYPES: Record<string, string> = {
 };
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB
 
-/**
- * Local (Docker): grava em public/uploads/<categoria>/ — cai dentro do
- * volume Docker "uploads_data" (ver docker-compose.yml), sobrevivendo a
- * rebuild do container.
- *
- * Produção (Vercel): não existe disco persistente em serverless — um
- * arquivo escrito assim desaparece no próximo deploy (ou já nem
- * funciona, o sistema de arquivos é somente leitura). Por isso, quando a
- * Vercel injeta BLOB_READ_WRITE_TOKEN automaticamente (ao conectar um
- * Blob Store ao projeto), a gente sobe pro Vercel Blob em vez de disco —
- * sem precisar mudar nada no fluxo de trabalho local.
- */
+
 async function saveUploadedFile(categorySlug: string, filename: string, file: File): Promise<string> {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const blob = await put(`${categorySlug}/${filename}`, file, { access: "public" });
@@ -113,9 +102,7 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
     return { error: "Categoria não encontrada." };
   }
 
-  // Nome gerado no servidor (não o nome original do arquivo) — evita dois
-  // problemas de uma vez: nomes repetidos sobrescrevendo foto antiga, e
-  // caracteres/caminho maliciosos vindos de um nome de arquivo não confiável.
+
   const filename = `${randomUUID()}.${ext}`;
   const src = await saveUploadedFile(categorySlug, filename, file);
 

@@ -19,9 +19,6 @@ function LoginForm() {
     const password = String(form.get("password") || "");
 
     startTransition(async () => {
-      // redirect: false pra gente controlar o redirecionamento (e
-      // mostrar a mensagem de erro na própria página em vez de cair
-      // numa tela de erro genérica do NextAuth).
       const result = await signIn("credentials", { email, password, redirect: false });
       if (result?.error) {
         setError("E-mail ou senha incorretos.");
@@ -83,8 +80,7 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  // useSearchParams precisa de um <Suspense> ao redor em build estático
-  // do Next — sem isso o `npm run build` avisa/quebra.
+
   return (
     <Suspense>
       <LoginForm />

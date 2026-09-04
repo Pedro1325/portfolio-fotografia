@@ -24,13 +24,9 @@ export async function registerPhotographer(input: {
     return { error: "Já existe uma conta com esse e-mail." };
   }
 
-  // Duas fotógrafas podem se chamar "Ana Silva" — o slug (endereço
-  // público, tipo /ana-silva) precisa ser único, então vamos tentando
-  // "ana-silva", "ana-silva-2", "ana-silva-3"... até achar um livre.
   const baseSlug = slugify(name) || "fotografa";
   let slug = baseSlug;
   let suffix = 1;
-  // eslint-disable-next-line no-await-in-loop
   while (await prisma.portfolio.findUnique({ where: { slug } })) {
     suffix += 1;
     slug = `${baseSlug}-${suffix}`;
@@ -60,8 +56,6 @@ export async function registerPhotographer(input: {
               fontFamily: DEFAULT_THEME.fontFamily,
             },
           },
-          // Categorias padrão pra já ter uma estrutura pra trabalhar em
-          // cima — sem fotos ainda, a fotógrafa adiciona pelo dashboard.
           categories: {
             create: [
               { slug: "casamentos", page: "/02", label: "Casamentos & Eventos", order: 0 },

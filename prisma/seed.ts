@@ -3,10 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/db";
 import { PORTFOLIO_DATA } from "../lib/portfolioData";
 
-// Credenciais da ÚNICA conta de admin vêm do .env (nunca do código —
-// .env está no .gitignore, então isso nunca vai pro histórico do git).
-// Sem ADMIN_EMAIL/ADMIN_PASSWORD configurados, o seed recusa a rodar em
-// vez de inventar uma senha padrão previsível.
+
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
@@ -23,10 +20,6 @@ async function main() {
   const email = ADMIN_EMAIL.trim().toLowerCase();
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
-  // upsert por e-mail: se você trocar o ADMIN_EMAIL no .env depois de já
-  // ter rodado o seed uma vez, isso cria uma conta NOVA em vez de
-  // renomear a antiga — rode `docker compose down -v` antes de reseedar
-  // se quiser garantir que só existe uma conta de admin no banco.
   const user = await prisma.user.upsert({
     where: { email },
     update: { passwordHash },

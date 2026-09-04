@@ -62,10 +62,7 @@ model Theme {
   fontFamily  String    @default("hand") // "hand" | "serif" | "sans"
 }
 
-// Corresponde a Category em lib/types.ts. "slug" substitui o antigo
-// Category.id (ex: "casamentos") — agora único só DENTRO do portfólio
-// (@@unique([portfolioId, slug])), não globalmente, porque duas fotógrafas
-// diferentes podem ter cada uma sua própria categoria "casamentos".
+
 model Category {
   id          String    @id @default(cuid())
   portfolioId String
@@ -81,10 +78,6 @@ model Category {
   @@unique([portfolioId, slug])
 }
 
-// Corresponde a Photo em lib/types.ts. Também referencia portfolioId
-// diretamente (além de categoryId) — deixa a consulta "todas as fotos
-// desta fotógrafa" simples e ajuda a impor a regra de segurança de só
-// mutar fotos que pertencem ao portfolio do usuário logado.
 model Photo {
   id          String    @id @default(cuid())
   portfolioId String

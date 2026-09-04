@@ -81,10 +81,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
   }
 
   async function handleUpload(formData: FormData): Promise<UploadPhotoResult> {
-    // Diferente dos outros handlers: aqui a gente espera a resposta do
-    // servidor ANTES de mexer no estado local — o arquivo em si só existe
-    // depois do upload terminar, não tem como "otimisticamente" mostrar
-    // uma foto que ainda não foi salva em disco.
+
     const result = await uploadPhoto(formData);
     if (!("error" in result)) {
       const next = clone(state);

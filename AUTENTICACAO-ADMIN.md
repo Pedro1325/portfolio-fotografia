@@ -50,7 +50,6 @@ redirecionar pra uma tela de login.
 Esboço de como fica (ilustrativo, ainda não está no projeto):
 
 ```js
-// middleware.js — na raiz do projeto
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
