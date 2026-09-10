@@ -41,7 +41,7 @@ export default function PhotographerProfileForm({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        {/* Foto de Perfil */}
+
         <div className="md:col-span-4 flex flex-col items-center gap-3 p-4 bg-brand-bg-raised rounded-card border border-brand-line">
           <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">
             Foto de Perfil (Sobre Mim)
@@ -78,7 +78,6 @@ export default function PhotographerProfileForm({
           </label>
         </div>
 
-        {/* Campos de Texto */}
         <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">

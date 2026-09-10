@@ -223,7 +223,6 @@ Para que o usuário altere as cores no painel e o site público aplique essas co
 
 1. **Definição em CSS das Variáveis:**
 ```css
-/* site.css */
 :root {
   --bg-primary: #fff7f7;
   --bg-tint: #fef0f2;

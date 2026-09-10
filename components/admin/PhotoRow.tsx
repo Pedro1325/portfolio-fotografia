@@ -41,7 +41,7 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
 
   return (
     <tr className="hover:bg-brand-bg-inset/40 transition-colors">
-      {/* Miniatura Quadrada Estilo Polaróide */}
+
       <td className="p-2.5">
         <div className="relative group w-14 h-14 rounded-[2px] bg-brand-paper border border-brand-line-soft shadow-sm overflow-hidden flex items-center justify-center">
           {!photo.src ? (
@@ -53,7 +53,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
               não encontrada
             </span>
           ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={photo.src}
               alt=""
@@ -71,7 +70,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
         </div>
       </td>
 
-      {/* Botão de Escolher Foto do Computador */}
       <td className="p-2.5">
         <div className="flex flex-col gap-1">
           <label className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-brand-bg-raised hover:bg-brand-bg-inset text-brand-ink text-xs font-semibold rounded border border-brand-line shadow-sm cursor-pointer transition">
@@ -107,7 +105,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
         </div>
       </td>
 
-      {/* Checkbox Mostrar */}
       <td className="p-2.5">
         <label className="flex items-center gap-1.5 text-xs text-brand-ink cursor-pointer">
           <input
@@ -120,7 +117,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
         </label>
       </td>
 
-      {/* Checkbox Destaque */}
       <td className="p-2.5">
         <label className="flex items-center gap-1.5 text-xs text-brand-ink cursor-pointer">
           <input
@@ -132,8 +128,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
           <span>Destaque</span>
         </label>
       </td>
-
-      {/* Ordem */}
       <td className="p-2.5">
         <input
           className="w-14 px-2 py-1 bg-brand-bg-raised border border-brand-line rounded text-xs text-brand-ink focus:outline-none focus:ring-1 focus:ring-brand-accent-deep"
@@ -147,7 +141,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
         />
       </td>
 
-      {/* Legenda da Foto */}
       <td className="p-2.5">
         <input
           className="w-full min-w-[160px] px-2.5 py-1.5 bg-brand-bg-raised border border-brand-line rounded text-xs text-brand-ink focus:outline-none focus:ring-1 focus:ring-brand-accent-deep"
@@ -158,7 +151,6 @@ export default function PhotoRow({ photo, onChange, onRemove, onReplaceFile }: P
         />
       </td>
 
-      {/* Botão Remover */}
       <td className="p-2.5 text-center">
         <button
           type="button"

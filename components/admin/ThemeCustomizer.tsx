@@ -18,7 +18,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
         </p>
       </div>
 
-      {/* 1. Presets de Temas Prontos */}
       <div>
         <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint block mb-3">
           1. Escolha uma Paleta Pronta
@@ -50,7 +49,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
                   )}
                 </div>
 
-                {/* Bolinhas de Amostra de Cores */}
                 <div className="flex items-center gap-1.5 pt-1">
                   <span
                     className="w-5 h-5 rounded-full border border-black/10 shadow-sm"
@@ -83,13 +81,11 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
 
       <hr className="border-brand-line-soft/60" />
 
-      {/* 2. Color Pickers para Ajuste Fino */}
       <div>
         <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint block mb-3">
           2. Ou Faça o Ajuste Fino das Cores
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Cor de Fundo */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-brand-ink">Fundo Principal</p>
@@ -106,7 +102,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
             </div>
           </div>
 
-          {/* Cor de Fundo Secundária */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-brand-ink">Fundo das Seções</p>
@@ -123,7 +118,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
             </div>
           </div>
 
-          {/* Cor de Destaque / Botões */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-brand-ink">Cor de Destaque</p>
@@ -140,7 +134,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
             </div>
           </div>
 
-          {/* Cor do Texto do Botão */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-brand-ink">Texto do Botão</p>
@@ -157,7 +150,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
             </div>
           </div>
 
-          {/* Cor dos Textos */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-brand-ink">Cor dos Textos</p>
@@ -174,7 +166,6 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
             </div>
           </div>
 
-          {/* Estilo de Tipografia */}
           <div className="bg-brand-bg-raised p-3.5 rounded border border-brand-line flex flex-col justify-center gap-1.5">
             <label htmlFor="f-font" className="text-xs font-semibold text-brand-ink">
               Estilo da Fonte

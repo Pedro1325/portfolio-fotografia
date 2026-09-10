@@ -132,7 +132,6 @@ export default function AddPhotoForm({ categories, onUpload, onStatus }: AddPhot
 
         {preview && (
           <div className="col-span-full bg-brand-bg-inset p-3.5 rounded border border-brand-line-soft flex items-center gap-4 text-xs text-brand-ink-soft mt-2" aria-live="polite">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Pré-visualização" className="w-16 h-16 object-cover rounded shadow-sm" />
             <p>Pré-visualização — clique em &quot;Enviar foto&quot; pra salvar de verdade.</p>
           </div>

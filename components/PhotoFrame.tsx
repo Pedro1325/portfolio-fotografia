@@ -7,7 +7,7 @@ import type { Photo } from "@/lib/types";
 interface PhotoFrameProps {
   photo: Photo;
   index: number;
-  heart?: boolean; // Mantido por compatibilidade de tipo, mas sempre renderiza estilo polaróide quadrada
+  heart?: boolean; 
   hero?: boolean;
   rotate?: boolean;
 }
@@ -29,7 +29,6 @@ export default function PhotoFrame({ photo, index, hero = false, rotate = false 
         hero ? "max-w-sm sm:max-w-md w-full mx-auto" : "max-w-xs w-full mx-auto"
       }`}
     >
-      {/* Fita adesiva estilo washi tape no topo */}
       <span
         className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-5 bg-brand-bg-alt/80 backdrop-blur-sm border-l border-r border-dashed border-brand-accent/40 -rotate-1 shadow-sm pointer-events-none z-10"
         aria-hidden="true"
@@ -39,7 +38,6 @@ export default function PhotoFrame({ photo, index, hero = false, rotate = false 
         {indexLabel}
       </span>
 
-      {/* Foto quadrada estilo polaróide */}
       <div className="relative overflow-hidden aspect-square w-full rounded-[2px] bg-checkered border border-black/5 shadow-inner">
         {photo.src ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -62,7 +60,6 @@ export default function PhotoFrame({ photo, index, hero = false, rotate = false 
         )}
       </div>
 
-      {/* Legenda na barra inferior da polaróide */}
       <figcaption className="font-hand text-lg sm:text-xl text-brand-ink-soft text-center mt-3 px-2 line-clamp-2">
         {photo.caption || ""}
       </figcaption>

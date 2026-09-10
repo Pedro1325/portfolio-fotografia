@@ -11,6 +11,7 @@ interface CategoryTableProps {
   onRemove: (photo: Photo) => void;
   onReplaceFile: (photoId: string, file: File) => Promise<void>;
   onCategoryChange: (categoryId: string, patch: Partial<Category>) => void;
+  onRemoveCategory?: (categoryId: string) => void;
 }
 
 export default function CategoryTable({
@@ -20,6 +21,7 @@ export default function CategoryTable({
   onRemove,
   onReplaceFile,
   onCategoryChange,
+  onRemoveCategory,
 }: CategoryTableProps) {
   const photos = photosByCategory(state, category.id);
 
@@ -28,7 +30,6 @@ export default function CategoryTable({
       className="bg-brand-paper p-6 sm:p-8 rounded-card border border-brand-line-soft/80 shadow-card flex flex-col gap-6"
       aria-labelledby={"cat-" + category.id}
     >
-      {/* Cabeçalho da Seção com Edição Dinâmica do Título */}
       <div className="bg-brand-bg-raised p-4 sm:p-5 rounded-card border border-brand-line flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-line pb-3">
           <div className="flex items-center gap-2">
@@ -36,13 +37,31 @@ export default function CategoryTable({
               {category.page} — {category.label}
             </span>
           </div>
-          <span className="text-[11px] font-mono text-brand-ink-faint bg-brand-bg-inset px-2.5 py-1 rounded">
-            #{category.id}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-brand-ink-faint bg-brand-bg-inset px-2.5 py-1 rounded">
+              #{category.id}
+            </span>
+            {onRemoveCategory && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Tem certeza que deseja excluir o álbum "${category.label}" e todas as fotos dele?`
+                    )
+                  ) {
+                    onRemoveCategory(category.id);
+                  }
+                }}
+                className="text-xs text-rose-600 hover:text-rose-800 font-semibold px-2.5 py-1 rounded hover:bg-rose-50 border border-rose-200 transition"
+              >
+                Excluir Álbum
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
-          {/* Título da Seção (ex: Casamentos & Eventos) */}
           <div className="sm:col-span-5 flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">
               Título da Seção
@@ -56,7 +75,6 @@ export default function CategoryTable({
             />
           </div>
 
-          {/* Tag de Status */}
           <div className="sm:col-span-4 flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">
               Tag / Status
@@ -70,7 +88,6 @@ export default function CategoryTable({
             />
           </div>
 
-          {/* Numeração da Página */}
           <div className="sm:col-span-3 flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">
               Numeração / Página
@@ -84,7 +101,6 @@ export default function CategoryTable({
             />
           </div>
 
-          {/* Frase / Descrição */}
           <div className="sm:col-span-12 flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold uppercase tracking-wider text-brand-ink-faint">
               Frase ou Descrição da Seção
@@ -100,7 +116,6 @@ export default function CategoryTable({
         </div>
       </div>
 
-      {/* Tabela de Fotos do Álbum */}
       <div className="overflow-x-auto rounded border border-brand-line-soft/80 bg-brand-bg-raised">
         <table className="w-full text-left text-xs border-collapse">
           <thead className="bg-brand-bg-inset border-b border-brand-line-soft text-brand-ink-faint uppercase tracking-wider">

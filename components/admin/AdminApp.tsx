@@ -12,12 +12,15 @@ import {
   uploadPhoto,
   replacePhotoFile,
   updateCategory,
+  createCategory,
+  removeCategory,
   updatePhotographer,
   uploadAvatar,
   type UploadPhotoResult,
 } from "@/lib/actions/portfolio";
 import { BackArrowIcon, AlertIcon } from "../icons";
 import AdminSummary from "./AdminSummary";
+import AddCategoryForm from "./AddCategoryForm";
 import AddPhotoForm from "./AddPhotoForm";
 import CategoryTable from "./CategoryTable";
 import AdminActions from "./AdminActions";
@@ -114,6 +117,31 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
         "Não foi possível salvar os dados da categoria."
       );
     }, 500);
+  }
+
+  async function handleCreateCategory(data: { label: string; note?: string; status?: string; page?: string }) {
+    const result = await createCategory(data);
+    if (result.category) {
+      const next = clone(state);
+      next.categories.push(result.category);
+      setState(next);
+    }
+    return result;
+  }
+
+  async function handleRemoveCategory(categoryId: string) {
+    const result = await removeCategory(categoryId);
+    if (result.success) {
+      const next = clone(state);
+      next.categories = next.categories.filter((c) => c.id !== categoryId);
+      next.photos = next.photos.filter((p) => p.category !== categoryId);
+      setState(next);
+      setStatus("Álbum e suas fotos removidos com sucesso.");
+      setStatusError(false);
+    } else if (result.error) {
+      setStatus(result.error);
+      setStatusError(true);
+    }
   }
 
   function handlePhotographerChange(patch: Partial<Photographer>) {
@@ -269,7 +297,6 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
       <main className="max-w-6xl mx-auto px-6 py-8 pb-32 flex flex-col gap-10">
         <AdminSummary state={state} />
 
-        {/* 1. Personalizar Aparência & Cores */}
         <ThemeCustomizer
           theme={state.theme || DEFAULT_THEME}
           onChange={handleThemeChange}
@@ -283,7 +310,17 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
           onAvatarUpload={handleAvatarUpload}
         />
 
-        {/* 3. Adicionar Nova Foto */}
+        {/* 3. Gerenciar e Criar Novos Álbuns / Categorias */}
+        <AddCategoryForm
+          existingCount={state.categories.length}
+          onCreate={handleCreateCategory}
+          onStatus={(msg, err) => {
+            setStatus(msg);
+            setStatusError(!!err);
+          }}
+        />
+
+        {/* 4. Adicionar Nova Foto */}
         <AddPhotoForm
           categories={state.categories}
           onUpload={handleUpload}
@@ -293,7 +330,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
           }}
         />
 
-        {/* 4. Categorias e Tabela de Fotos com Edição de Título e Escolha do PC */}
+        {/* 5. Categorias e Tabela de Fotos com Edição de Título e Escolha do PC */}
         {state.categories.map((category) => (
           <CategoryTable
             key={category.id}
@@ -303,6 +340,7 @@ export default function AdminApp({ initialData }: { initialData: PortfolioData }
             onRemove={handleRemove}
             onReplaceFile={handleReplacePhotoFile}
             onCategoryChange={handleCategoryChange}
+            onRemoveCategory={handleRemoveCategory}
           />
         ))}
       </main>

@@ -1,7 +1,3 @@
-/*
-  components/icons.tsx — small authored icon set, one consistent stroke
-  (1.6) and round cap/join, 24x24 viewBox. No emoji, no icon-font.
-*/
 
 import type { SVGProps } from "react";
 

@@ -9,7 +9,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { ThemeConfig } from "@/lib/themes";
-import type { Photographer } from "@/lib/types";
+import type { Photographer, Category } from "@/lib/types";
+import { slugify } from "@/lib/adminHelpers";
 
 
  
@@ -197,6 +198,76 @@ export async function updateCategory(
 
   revalidatePath("/");
   revalidatePath("/admin");
+}
+
+export async function createCategory(data: {
+  label: string;
+  note?: string;
+  status?: string;
+  page?: string;
+}): Promise<{ error?: string; category?: Category }> {
+  const portfolioId = await getCurrentPortfolioId();
+  const rawLabel = (data.label || "").trim();
+  if (!rawLabel) {
+    return { error: "Informe o nome da categoria." };
+  }
+
+  const baseSlug = slugify(rawLabel) || "album";
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await prisma.category.findFirst({ where: { portfolioId, slug } })) {
+    counter++;
+    slug = `${baseSlug}-${counter}`;
+  }
+
+  const existingCount = await prisma.category.count({ where: { portfolioId } });
+  const pageNumber = data.page?.trim() || `/${String(existingCount + 2).padStart(2, "0")}`;
+
+  const created = await prisma.category.create({
+    data: {
+      portfolioId,
+      slug,
+      label: rawLabel,
+      page: pageNumber,
+      status: data.status?.trim() || "Disponível",
+      note: data.note?.trim() || "",
+      order: existingCount,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+
+  return {
+    category: {
+      id: created.slug,
+      label: created.label,
+      page: created.page,
+      status: created.status ?? "",
+      note: created.note ?? "",
+    },
+  };
+}
+
+
+export async function removeCategory(categorySlugOrId: string): Promise<{ error?: string; success?: boolean }> {
+  const portfolioId = await getCurrentPortfolioId();
+  const cat = await prisma.category.findFirst({
+    where: {
+      portfolioId,
+      OR: [{ slug: categorySlugOrId }, { id: categorySlugOrId }],
+    },
+  });
+  if (!cat) return { error: "Categoria não encontrada." };
+
+  await prisma.category.delete({
+    where: { id: cat.id },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  return { success: true };
 }
 
 

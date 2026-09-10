@@ -7,14 +7,6 @@ export type PortfolioWithRelations = PortfolioRow & {
   photos: PhotoRow[];
 };
 
-/**
- * Os componentes existentes (Hero, AlbumSection, PhotoFrame, AdminApp e
- * companhia) foram todos escritos contra o formato `PortfolioData` de
- * lib/types.ts. Em vez de reescrever cada um deles pra entender linhas do
- * Prisma, esta função converte o resultado da query (Portfolio + suas
- * relações) de volta pro mesmo formato de sempre — assim quase nenhum
- * componente de UI precisa mudar nesta fase.
- */
 export function toPortfolioData(row: PortfolioWithRelations): PortfolioData {
   const categories = [...row.categories].sort((a, b) => a.order - b.order);
 
