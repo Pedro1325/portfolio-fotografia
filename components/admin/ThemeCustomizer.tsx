@@ -25,7 +25,11 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {THEME_PRESETS.map((preset) => {
-            const isSelected = theme.id === preset.id;
+            const isSelected =
+              theme.id === preset.id ||
+              theme.name.trim().toLowerCase() === preset.name.trim().toLowerCase() ||
+              (theme.bgPrimary.toLowerCase() === preset.bgPrimary.toLowerCase() &&
+                theme.accentColor.toLowerCase() === preset.accentColor.toLowerCase());
             return (
               <button
                 key={preset.id}
@@ -33,14 +37,14 @@ export default function ThemeCustomizer({ theme, onChange, onSelectPreset }: The
                 onClick={() => onSelectPreset(preset)}
                 className={`p-4 rounded-card text-left transition-all border flex flex-col gap-2.5 relative ${
                   isSelected
-                    ? "border-brand-accent-deep ring-2 ring-brand-accent-deep/30 bg-brand-bg-inset/50 shadow-md"
+                    ? "border-brand-accent-deep ring-2 ring-brand-accent-deep/30 bg-brand-bg-inset/60 shadow-md"
                     : "border-brand-line-soft bg-brand-bg-raised hover:border-brand-accent/50 hover:bg-brand-bg-inset/30"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-xs text-brand-ink">{preset.name}</span>
                   {isSelected && (
-                    <span className="text-[10px] uppercase font-bold text-brand-accent-deep bg-brand-bg px-2 py-0.5 rounded-full border border-brand-line-soft">
+                    <span className="text-[10px] uppercase font-bold text-brand-accent-deep bg-brand-paper px-2 py-0.5 rounded-full border border-brand-line-soft shadow-sm">
                       Ativo
                     </span>
                   )}

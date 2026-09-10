@@ -9,13 +9,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { ThemeConfig } from "@/lib/themes";
+import type { Photographer } from "@/lib/types";
 
-/**
- * FASE 2: agora que existe login, "a fotógrafa atual" é quem estiver
- * autenticada na sessão — nunca um id que o cliente mandou (só assim dá
- * pra garantir que uma fotógrafa não edita o portfolio de outra). Isso é
- * chamado em toda action abaixo antes de qualquer escrita no banco.
- */
+
+ 
 async function getCurrentPortfolioId(): Promise<string> {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error("Não autenticado.");
@@ -42,12 +39,14 @@ export async function updatePhoto(photoId: string, patch: PhotoPatch) {
     data: patch,
   });
   revalidatePath("/");
+  revalidatePath("/admin");
 }
 
 export async function removePhoto(photoId: string) {
   const portfolioId = await getCurrentPortfolioId();
   await prisma.photo.delete({ where: { id: photoId, portfolioId } });
   revalidatePath("/");
+  revalidatePath("/admin");
 }
 
 const ALLOWED_TYPES: Record<string, string> = {
@@ -56,7 +55,6 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/webp": "webp",
 };
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8MB
-
 
 async function saveUploadedFile(categorySlug: string, filename: string, file: File): Promise<string> {
   if (process.env.BLOB_READ_WRITE_TOKEN) {
@@ -95,16 +93,18 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
   }
 
   const category = await prisma.category.findFirst({
-    where: { portfolioId, slug: categorySlug },
-    select: { id: true },
+    where: {
+      portfolioId,
+      OR: [{ slug: categorySlug }, { id: categorySlug }],
+    },
+    select: { id: true, slug: true },
   });
   if (!category) {
     return { error: "Categoria não encontrada." };
   }
 
-
   const filename = `${randomUUID()}.${ext}`;
-  const src = await saveUploadedFile(categorySlug, filename, file);
+  const src = await saveUploadedFile(category.slug, filename, file);
 
   const last = await prisma.photo.findFirst({
     where: { portfolioId, categoryId: category.id },
@@ -125,9 +125,10 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
   });
 
   revalidatePath("/");
+  revalidatePath("/admin");
   return {
     id: created.id,
-    category: categorySlug,
+    category: category.slug,
     src: created.src as string,
     caption: created.caption ?? "",
     featured: created.featured,
@@ -136,24 +137,160 @@ export async function uploadPhoto(formData: FormData): Promise<UploadPhotoResult
   };
 }
 
+export async function replacePhotoFile(
+  photoId: string,
+  formData: FormData
+): Promise<{ error?: string; src?: string }> {
+  const portfolioId = await getCurrentPortfolioId();
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Selecione um arquivo de imagem." };
+  }
+  const ext = ALLOWED_TYPES[file.type];
+  if (!ext) {
+    return { error: "Formato não aceito. Envie um arquivo JPG, PNG ou WebP." };
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: "Arquivo muito grande (máximo 8MB)." };
+  }
+
+  const photo = await prisma.photo.findUnique({
+    where: { id: photoId, portfolioId },
+    include: { category: true },
+  });
+  if (!photo) {
+    return { error: "Foto não encontrada." };
+  }
+
+  const folder = photo.category?.slug || "geral";
+  const filename = `${randomUUID()}.${ext}`;
+  const src = await saveUploadedFile(folder, filename, file);
+
+  await prisma.photo.update({
+    where: { id: photoId, portfolioId },
+    data: { src },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  return { src };
+}
+
+export async function updateCategory(
+  categorySlugOrId: string,
+  patch: Partial<{ label: string; note: string; status: string; page: string }>
+) {
+  const portfolioId = await getCurrentPortfolioId();
+  const cat = await prisma.category.findFirst({
+    where: {
+      portfolioId,
+      OR: [{ slug: categorySlugOrId }, { id: categorySlugOrId }],
+    },
+  });
+  if (!cat) throw new Error("Categoria não encontrada.");
+
+  await prisma.category.update({
+    where: { id: cat.id },
+    data: patch,
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+
+export async function updatePhotographer(patch: Partial<Photographer>) {
+  const portfolioId = await getCurrentPortfolioId();
+  await prisma.portfolio.update({
+    where: { id: portfolioId },
+    data: {
+      photographerName: patch.name,
+      role: patch.role,
+      location: patch.location,
+      bio: patch.bio,
+      email: patch.email,
+      phone: patch.phone,
+      instagram: patch.instagram,
+      whatsapp: patch.whatsapp,
+      avatar: patch.avatar,
+    },
+  });
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+
+export async function uploadAvatar(formData: FormData): Promise<{ avatar?: string; error?: string }> {
+  const portfolioId = await getCurrentPortfolioId();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Selecione um arquivo de imagem." };
+  }
+  const ext = ALLOWED_TYPES[file.type];
+  if (!ext) {
+    return { error: "Formato não aceito. Envie um arquivo JPG, PNG ou WebP." };
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: "Arquivo muito grande (máximo 8MB)." };
+  }
+
+  const filename = `avatar-${randomUUID()}.${ext}`;
+  const avatar = await saveUploadedFile("perfil", filename, file);
+
+  await prisma.portfolio.update({
+    where: { id: portfolioId },
+    data: { avatar },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  return { avatar };
+}
+
 type ThemePatch = Partial<
   Pick<ThemeConfig, "bgPrimary" | "bgTint" | "accentColor" | "accentInk" | "textColor" | "fontFamily">
 >;
 
 export async function updateTheme(patch: ThemePatch) {
   const portfolioId = await getCurrentPortfolioId();
-  await prisma.theme.update({
+  await prisma.theme.upsert({
     where: { portfolioId },
-    data: { ...patch, presetId: "custom" },
+    update: { ...patch, presetId: "custom" },
+    create: {
+      portfolioId,
+      presetId: "custom",
+      name: "Personalizado",
+      description: "Paleta personalizada",
+      bgPrimary: patch.bgPrimary || "#fdf4ee",
+      bgTint: patch.bgTint || "#fbe9ee",
+      accentColor: patch.accentColor || "#b83d6b",
+      accentInk: patch.accentInk || "#ffffff",
+      textColor: patch.textColor || "#5a3341",
+      fontFamily: patch.fontFamily || "hand",
+    },
   });
   revalidatePath("/");
+  revalidatePath("/admin");
 }
 
 export async function selectThemePreset(preset: ThemeConfig) {
   const portfolioId = await getCurrentPortfolioId();
-  await prisma.theme.update({
+  await prisma.theme.upsert({
     where: { portfolioId },
-    data: {
+    update: {
+      presetId: preset.id,
+      name: preset.name,
+      description: preset.description,
+      bgPrimary: preset.bgPrimary,
+      bgTint: preset.bgTint,
+      accentColor: preset.accentColor,
+      accentInk: preset.accentInk,
+      textColor: preset.textColor,
+      fontFamily: preset.fontFamily,
+    },
+    create: {
+      portfolioId,
       presetId: preset.id,
       name: preset.name,
       description: preset.description,
@@ -166,4 +303,5 @@ export async function selectThemePreset(preset: ThemeConfig) {
     },
   });
   revalidatePath("/");
+  revalidatePath("/admin");
 }

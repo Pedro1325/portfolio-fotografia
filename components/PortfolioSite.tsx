@@ -1,29 +1,21 @@
 "use client";
 
 import type { PortfolioData } from "@/lib/types";
-import HeartClipDefs from "./HeartClipDefs";
 import TopBar from "./TopBar";
 import Hero from "./Hero";
 import AlbumSection from "./AlbumSection";
 import AboutSection from "./AboutSection";
 import ContactSection from "./ContactSection";
 import Footer from "./Footer";
-import { DEFAULT_THEME } from "@/lib/themes";
+import { DEFAULT_THEME, getThemeCssVariables } from "@/lib/themes";
 
 export default function PortfolioSite({ initialData }: { initialData: PortfolioData }) {
   const data = initialData;
   const currentTheme = data.theme || DEFAULT_THEME;
-  const themeStyles = {
-     "--brand-bg": currentTheme.bgPrimary,
-        "--brand-bg-tint": currentTheme.bgTint,
-        "--brand-accent": currentTheme.accentColor,
-        "--brand-accent-ink": currentTheme.accentInk,
-        "--brand-ink": currentTheme.textColor,
-  } as React.CSSProperties;
+  const themeStyles = getThemeCssVariables(currentTheme);
 
   return (
     <div style={themeStyles} className="min-h-screen bg-brand-bg text-brand-ink transition-colors duration-300">
-      <HeartClipDefs />
       <a
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-accent-deep focus:text-brand-accent-ink focus:rounded-full focus:shadow-lg focus:font-semibold focus:text-sm"
         href="#conteudo"
@@ -31,7 +23,7 @@ export default function PortfolioSite({ initialData }: { initialData: PortfolioD
         Pular para o conteúdo
       </a>
 
-      <TopBar />
+      <TopBar data={data} />
 
       <noscript>
         <p className="bg-brand-accent-soft text-brand-ink text-center py-2.5 px-4 text-sm font-medium">

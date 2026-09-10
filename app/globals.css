@@ -1,8 +1,32 @@
-@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --brand-bg: #fdf4ee;
+  --brand-bg-tint: #fbe9ee;
+  --brand-bg-raised: #ffffff;
+  --brand-bg-inset: #fbe9ee;
+  --brand-line: rgba(90, 51, 65, 0.18);
+  --brand-line-soft: rgba(90, 51, 65, 0.1);
+  --brand-ink: #5a3341;
+  --brand-ink-soft: rgba(90, 51, 65, 0.72);
+  --brand-ink-faint: rgba(90, 51, 65, 0.5);
+  --brand-accent: #e0709e;
+  --brand-accent-strong: #c94f7f;
+  --brand-accent-deep: #b83d6b;
+  --brand-accent-soft: #f7c9d9;
+  --brand-accent-ink: #fff9f6;
+  --brand-paper: #ffffff;
+  --brand-paper-ink: #5a3341;
+  --brand-gold: #cf9f5f;
+  --brand-gold-soft: #e8d3ad;
+  --font-display: "Alex Brush", "Segoe Script", cursive;
+  --font-hand: "Caveat", "Segoe Script", cursive;
+  --font-body: "Poppins", "Segoe UI", sans-serif;
+}
 
 @layer base {
   html {
@@ -14,10 +38,11 @@
   }
 }
 
-.clip-heart {
-  clip-path: url(#heart-clip);
+.bg-checkered {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--brand-bg-inset, #fbe9ee) 0 2px,
+    var(--brand-paper, #fffaf3) 2px 14px
+  );
 }
 
-.bg-checkered {
-  background: repeating-linear-gradient(135deg, #fbe9ee 0 2px, #fffaf3 2px 14px);
-}

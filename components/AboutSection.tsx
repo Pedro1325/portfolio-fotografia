@@ -17,7 +17,7 @@ export default function AboutSection({ data }: { data: PortfolioData }) {
     <section className="py-20 px-6 max-w-5xl mx-auto" id="sobre">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 items-center">
         <Reveal className="md:col-span-5 flex justify-center" aria-label="Foto da fotógrafa">
-          <PhotoFrame photo={profilePhoto} index={1} heart />
+          <PhotoFrame photo={profilePhoto} index={0} rotate={false} />
         </Reveal>
         <Reveal className="md:col-span-7 bg-brand-paper p-8 md:p-10 rounded-card shadow-card border border-brand-line-soft/60 relative flex flex-col gap-2">
           <p className="font-hand text-2xl text-brand-accent-strong">sobre mim</p>

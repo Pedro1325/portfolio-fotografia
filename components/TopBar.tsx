@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { HeartFilledIcon } from "./icons";
+import type { PortfolioData } from "@/lib/types";
 
-export default function TopBar() {
+export default function TopBar({ data }: { data?: PortfolioData }) {
   const [open, setOpen] = useState(false);
+  const categories = data?.categories || [];
+  const brandName = data?.photographer.name?.split(" ")[0] || "Ateliê";
 
   return (
     <header className="sticky top-0 z-40 bg-brand-bg/90 backdrop-blur-md border-b border-brand-line-soft transition-colors">
       <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
         <a className="font-display text-3xl md:text-4xl text-brand-ink hover:text-brand-accent transition-colors" href="#topo" aria-label="Início">
-          Ateliê
+          {brandName}
         </a>
         <button
           className="md:hidden px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-ink bg-brand-bg-raised border border-brand-line rounded-full hover:bg-brand-bg-inset transition"
@@ -27,30 +30,17 @@ export default function TopBar() {
             open ? "flex shadow-lg md:shadow-none" : "hidden md:flex"
           }`}
         >
-          <a
-            href="#casamentos"
-            className="flex items-center gap-1.5 text-sm font-medium text-brand-ink-soft hover:text-brand-accent-strong transition-colors"
-            onClick={() => setOpen(false)}
-          >
-            <HeartFilledIcon className="w-3 h-3 text-brand-accent" />
-            Casamentos
-          </a>
-          <a
-            href="#retratos"
-            className="flex items-center gap-1.5 text-sm font-medium text-brand-ink-soft hover:text-brand-accent-strong transition-colors"
-            onClick={() => setOpen(false)}
-          >
-            <HeartFilledIcon className="w-3 h-3 text-brand-accent" />
-            Retratos
-          </a>
-          <a
-            href="#editorial"
-            className="flex items-center gap-1.5 text-sm font-medium text-brand-ink-soft hover:text-brand-accent-strong transition-colors"
-            onClick={() => setOpen(false)}
-          >
-            <HeartFilledIcon className="w-3 h-3 text-brand-accent" />
-            Editorial
-          </a>
+          {categories.map((c) => (
+            <a
+              key={c.id}
+              href={`#${c.id}`}
+              className="flex items-center gap-1.5 text-sm font-medium text-brand-ink-soft hover:text-brand-accent-strong transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <HeartFilledIcon className="w-3 h-3 text-brand-accent" />
+              {c.label}
+            </a>
+          ))}
           <a
             href="#sobre"
             className="text-sm font-medium text-brand-ink-soft hover:text-brand-accent-strong transition-colors"

@@ -26,7 +26,7 @@ export default function Hero({ data }: { data: PortfolioData }) {
             {data.photographer.name}
           </h1>
           <p className="font-hand text-2xl md:text-3xl text-brand-accent-strong">
-            registrando o que fica depois do flash
+            {data.photographer.role || "registrando o que fica depois do flash"}
           </p>
           <a
             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent-deep hover:bg-brand-accent-strong text-brand-accent-ink font-semibold text-xs md:text-sm uppercase tracking-wider rounded-full shadow-badge transition transform hover:-translate-y-0.5"
@@ -36,22 +36,22 @@ export default function Hero({ data }: { data: PortfolioData }) {
             Vamos conversar
           </a>
           <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-brand-line-soft w-full text-sm font-medium text-brand-ink-soft">
-            <a href="#casamentos" className="hover:text-brand-accent-strong underline-offset-4 hover:underline transition-colors">
-              casamentos
-            </a>
-            <a href="#retratos" className="hover:text-brand-accent-strong underline-offset-4 hover:underline transition-colors">
-              retratos
-            </a>
-            <a href="#editorial" className="hover:text-brand-accent-strong underline-offset-4 hover:underline transition-colors">
-              editorial
-            </a>
+            {data.categories.map((cat) => (
+              <a
+                key={cat.id}
+                href={`#${cat.id}`}
+                className="hover:text-brand-accent-strong underline-offset-4 hover:underline transition-colors"
+              >
+                {cat.label.toLowerCase()}
+              </a>
+            ))}
           </div>
         </div>
 
         <div className="lg:col-span-5 flex justify-center lg:justify-end relative" aria-label="Foto em destaque">
           {photo && (
             <a className="block transition transform hover:scale-[1.02]" href={"#" + photo.category}>
-              <PhotoFrame photo={photo} index={0} heart hero />
+              <PhotoFrame photo={photo} index={0} hero rotate />
             </a>
           )}
         </div>

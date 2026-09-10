@@ -38,7 +38,7 @@ export default function AlbumSection({ data, category, tint = false }: AlbumSect
             </p>
           ) : (
             photos.map((photo, i) => (
-              <PhotoFrame key={photo.id} photo={photo} index={i} heart={i === 0} rotate={i !== 0} />
+              <PhotoFrame key={photo.id} photo={photo} index={i} rotate={true} />
             ))
           )}
         </div>
